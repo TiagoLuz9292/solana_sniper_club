@@ -18,11 +18,15 @@ async function getData() {
     fetchFileFromGitHub("results/live_investment/portfolio.json"),
   ]);
 
-  const trades = Papa.parse<Trade>(tradesRaw, { header: true, dynamicTyping: true, skipEmptyLines: true }).data
-    .sort((a, b) => new Date(b.close_ts).getTime() - new Date(a.close_ts).getTime());
+  const trades = Papa.parse<Trade>(tradesRaw, {
+    header: true, dynamicTyping: true, skipEmptyLines: true,
+    transform: (val, col) => col === "close_ts" ? String(val) : val,
+  }).data.sort((a, b) => new Date(b.close_ts).getTime() - new Date(a.close_ts).getTime());
 
-  const equity = Papa.parse<EquityPoint>(equityRaw, { header: true, dynamicTyping: true, skipEmptyLines: true }).data
-    .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+  const equity = Papa.parse<EquityPoint>(equityRaw, {
+    header: true, dynamicTyping: true, skipEmptyLines: true,
+    transform: (val, col) => col === "ts" ? String(val) : val,
+  }).data.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 
   const portfolio: Portfolio = JSON.parse(portfolioRaw);
 
