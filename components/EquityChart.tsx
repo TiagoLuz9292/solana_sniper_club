@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { createChart, ColorType, LineStyle } from "lightweight-charts";
-import type { EquityPoint } from "@/types";
+import type { EquityPoint, Trade } from "@/types";
 
-export default function EquityChart({ data }: { data: EquityPoint[] }) {
+export default function EquityChart({ data, trades }: { data: EquityPoint[]; trades: Trade[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current || data.length === 0) return;
+    if (!containerRef.current) return;
 
     const chart = createChart(containerRef.current, {
       layout: {
@@ -32,14 +32,31 @@ export default function EquityChart({ data }: { data: EquityPoint[] }) {
       priceFormat: { type: "price", precision: 2, minMove: 0.01 },
     });
 
-    // Add starting equity point
-    const startTime = Math.floor(new Date(data[0].ts).getTime() / 1000) - 86400;
+    // Build merged equity map from both trades.csv and equity.csv
+    // trades.csv covers all history; equity.csv may be missing early data
+    const seen = new Map<number, number>();
+
+    // First pass: trades.csv (equity_after = equity after that trade)
+    const sortedTrades = [...trades].sort(
+      (a, b) => new Date(a.close_ts).getTime() - new Date(b.close_ts).getTime()
+    );
+    for (const t of sortedTrades) {
+      const ts = Math.floor(new Date(t.close_ts).getTime() / 1000);
+      seen.set(ts, t.equity_after);
+    }
+
+    // Second pass: equity.csv (overwrites with its values where they exist)
+    for (const pt of data) {
+      const ts = Math.floor(new Date(pt.ts).getTime() / 1000);
+      seen.set(ts, pt.equity);
+    }
+
+    const allSorted = Array.from(seen.entries()).sort(([a], [b]) => a - b);
+    if (allSorted.length === 0) return;
+
     const points = [
-      { time: startTime as number, value: 300 },
-      ...data.map(pt => ({
-        time: Math.floor(new Date(pt.ts).getTime() / 1000) as number,
-        value: pt.equity,
-      })),
+      { time: (allSorted[0][0] - 86400) as number, value: 300 },
+      ...allSorted.map(([time, value]) => ({ time: time as number, value })),
     ];
     series.setData(points as Parameters<typeof series.setData>[0]);
     chart.timeScale().fitContent();
@@ -51,7 +68,7 @@ export default function EquityChart({ data }: { data: EquityPoint[] }) {
     ro.observe(containerRef.current);
 
     return () => { chart.remove(); ro.disconnect(); };
-  }, [data]);
+  }, [data, trades]);
 
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
