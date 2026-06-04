@@ -67,7 +67,7 @@ export default async function Dashboard() {
       <LiveStatus />
 
       {/* Equity curve */}
-      <EquityChart data={equity} />
+      <EquityChart data={equity} trades={trades} />
 
       {/* Monthly + Breakdown side by side on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
