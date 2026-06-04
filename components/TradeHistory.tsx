@@ -1,0 +1,126 @@
+"use client";
+
+import { useState } from "react";
+import type { Trade } from "@/types";
+
+type Filter = { system: string; symbol: string; direction: string; outcome: string };
+
+const INITIAL: Filter = { system: "All", symbol: "All", direction: "All", outcome: "All" };
+
+function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
+  return (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="bg-surface border border-surface-border text-slate-300 text-xs rounded px-2 py-1 outline-none focus:border-brand"
+    >
+      {options.map(o => <option key={o}>{o}</option>)}
+    </select>
+  );
+}
+
+export default function TradeHistory({ trades }: { trades: Trade[] }) {
+  const [filters, setFilters] = useState<Filter>(INITIAL);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+
+  const set = (key: keyof Filter) => (v: string) => setFilters(f => ({ ...f, [key]: v }));
+
+  const symbols = ["All", ...Array.from(new Set(trades.map(t => t.symbol.replace("USDT", ""))))];
+
+  const filtered = trades.filter(t => {
+    if (filters.system    !== "All" && t.system    !== filters.system)   return false;
+    if (filters.symbol    !== "All" && t.symbol    !== `${filters.symbol}USDT`) return false;
+    if (filters.direction !== "All" && t.direction !== filters.direction.toLowerCase()) return false;
+    if (filters.outcome   !== "All" && t.outcome   !== filters.outcome.toLowerCase())  return false;
+    return true;
+  });
+
+  const toggle = (i: number) =>
+    setExpanded(s => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; });
+
+  return (
+    <div className="bg-surface-card border border-surface-border rounded-xl p-6">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <h2 className="text-lg font-semibold text-white mr-2">Trade History</h2>
+        <Select value={filters.system}    onChange={set("system")}    options={["All", "ER", "VW"]} />
+        <Select value={filters.symbol}    onChange={set("symbol")}    options={symbols} />
+        <Select value={filters.direction} onChange={set("direction")} options={["All", "Long", "Short"]} />
+        <Select value={filters.outcome}   onChange={set("outcome")}   options={["All", "Win", "Loss"]} />
+        <span className="text-xs text-slate-500 ml-auto">{filtered.length} trades</span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-slate-400 text-xs uppercase border-b border-surface-border">
+              <th className="text-left pb-2 pr-4">Date</th>
+              <th className="text-left pb-2 pr-4">System</th>
+              <th className="text-left pb-2 pr-4">Symbol</th>
+              <th className="text-left pb-2 pr-4">Dir</th>
+              <th className="text-right pb-2 pr-4">Entry</th>
+              <th className="text-right pb-2 pr-4">Exit</th>
+              <th className="text-right pb-2 pr-4">PnL (R)</th>
+              <th className="text-right pb-2 pr-4">PnL ($)</th>
+              <th className="text-right pb-2">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((t, i) => {
+              const isWin = t.outcome === "win";
+              const isOpen = expanded.has(i);
+              return (
+                <>
+                  <tr
+                    key={`${t.close_ts}-${i}`}
+                    onClick={() => toggle(i)}
+                    className="border-b border-surface-border/40 hover:bg-white/5 cursor-pointer transition-colors"
+                  >
+                    <td className="py-2 pr-4 text-slate-400 text-xs tabular-nums">
+                      {new Date(t.close_ts).toLocaleDateString()}
+                    </td>
+                    <td className="py-2 pr-4 text-brand-light font-mono text-xs">{t.system}</td>
+                    <td className="py-2 pr-4 font-semibold">{t.symbol.replace("USDT", "")}</td>
+                    <td className="py-2 pr-4">
+                      <span className={`text-xs font-semibold ${t.direction === "long" ? "text-emerald-400" : "text-red-400"}`}>
+                        {t.direction === "long" ? "▲" : "▼"}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4 text-right font-mono text-xs">{t.fill_price.toFixed(4)}</td>
+                    <td className="py-2 pr-4 text-right font-mono text-xs">{t.exit_price.toFixed(4)}</td>
+                    <td className={`py-2 pr-4 text-right font-semibold tabular-nums ${isWin ? "text-emerald-400" : "text-red-400"}`}>
+                      {t.pnl_r >= 0 ? "+" : ""}{t.pnl_r.toFixed(1)}R
+                    </td>
+                    <td className={`py-2 pr-4 text-right font-semibold tabular-nums ${isWin ? "text-emerald-400" : "text-red-400"}`}>
+                      {t.pnl_usd >= 0 ? "+$" : "-$"}{Math.abs(t.pnl_usd).toFixed(2)}
+                    </td>
+                    <td className="py-2 text-right">
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${isWin ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
+                        {t.outcome.toUpperCase()}
+                      </span>
+                    </td>
+                  </tr>
+                  {isOpen && (
+                    <tr key={`${t.close_ts}-${i}-detail`} className="bg-white/3 border-b border-surface-border/40">
+                      <td colSpan={9} className="px-4 py-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-400">
+                          <div><span className="text-slate-500">SL</span> {t.stop_loss.toFixed(5)}</div>
+                          <div><span className="text-slate-500">TP</span> {t.take_profit.toFixed(5)} ({t.tp_r}R)</div>
+                          <div><span className="text-slate-500">Risk $</span> {t.dollar_risk.toFixed(2)}</div>
+                          <div><span className="text-slate-500">Bars held</span> {t.candles_held}</div>
+                          <div><span className="text-slate-500">Entry type</span> {t.entry_type}</div>
+                          <div><span className="text-slate-500">HTF aligned</span> {t.htf_multi_aligned ? "Yes" : "No"}</div>
+                          <div><span className="text-slate-500">DD after</span> {t.dd_pct.toFixed(2)}%</div>
+                          <div><span className="text-slate-500">Equity after</span> ${t.equity_after.toFixed(2)}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
