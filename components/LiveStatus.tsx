@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ActiveState } from "@/types";
+import type { ActiveState, ActiveTrade } from "@/types";
+
+const BYBIT_PUBLIC = "https://api-demo.bybit.com/v5/market/tickers?category=linear&symbol=";
 
 function DirectionBadge({ dir }: { dir: string }) {
   const isLong = dir === "long";
@@ -12,30 +14,42 @@ function DirectionBadge({ dir }: { dir: string }) {
   );
 }
 
+function calcPnl(t: ActiveTrade, currentPrice: number): number {
+  const qty = t.dollar_risk / Math.abs(t.fill_price - t.stop_loss);
+  const mult = t.direction === "long" ? 1 : -1;
+  return qty * (currentPrice - t.fill_price) * mult;
+}
+
+async function fetchTicker(symbol: string): Promise<number | null> {
+  try {
+    const res = await fetch(BYBIT_PUBLIC + symbol, { cache: "no-store" });
+    const data = await res.json();
+    const price = data?.result?.list?.[0]?.lastPrice;
+    return price ? parseFloat(price) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function LiveStatus() {
   const [active, setActive] = useState<ActiveState | null>(null);
-  const [livePos, setLivePos] = useState<Record<string, number>>({});
+  const [pnlMap, setPnlMap] = useState<Record<string, number>>({});
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   async function refresh() {
-    // Fetch independently so Bybit failure never hides active trades
-    const [activeRes, posRes] = await Promise.allSettled([
-      fetch("/api/active").then(r => r.json()),
-      fetch("/api/positions").then(r => r.json()),
-    ]);
+    const activeRes = await fetch("/api/active").then(r => r.json()).catch(() => null);
+    if (activeRes && !activeRes.error) setActive(activeRes);
 
-    if (activeRes.status === "fulfilled" && !activeRes.value?.error) {
-      setActive(activeRes.value);
-    }
+    const trades = Object.entries(activeRes ?? {})
+      .filter(([, v]: [string, unknown]) => (v as { active_trade: ActiveTrade | null }).active_trade !== null)
+      .map(([, v]) => (v as { active_trade: ActiveTrade }).active_trade);
 
-    if (posRes.status === "fulfilled" && !posRes.value?.error) {
-      const pnlMap: Record<string, number> = {};
-      for (const p of posRes.value.positions ?? []) {
-        pnlMap[`${p.symbol}-${p.side}`] = parseFloat(p.unrealisedPnl ?? "0");
-      }
-      setLivePos(pnlMap);
-    }
-
+    const newPnl: Record<string, number> = {};
+    await Promise.all(trades.map(async (t) => {
+      const price = await fetchTicker(t.symbol);
+      if (price !== null) newPnl[t.symbol] = calcPnl(t, price);
+    }));
+    setPnlMap(newPnl);
     setLastUpdate(new Date());
   }
 
@@ -79,8 +93,7 @@ export default function LiveStatus() {
             <tbody>
               {openTrades.map(([key, { active_trade: t }]) => {
                 if (!t) return null;
-                const side = t.direction === "long" ? "Buy" : "Sell";
-                const pnl  = livePos[`${t.symbol}-${side}`] ?? null;
+                const pnl  = pnlMap[t.symbol] ?? null;
                 const pnlColor = pnl === null ? "text-slate-400" : pnl >= 0 ? "text-emerald-400" : "text-red-400";
                 return (
                   <tr key={key} className="border-b border-surface-border/50 last:border-0">
