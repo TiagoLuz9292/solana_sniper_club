@@ -41,15 +41,15 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
       {/* Fee callout */}
-      <div className="mb-5 inline-flex items-center gap-4">
-        <p className="text-sm text-emerald-400 whitespace-nowrap">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <p className="text-sm text-emerald-400">
           Exchange fees shown per trade (expand any row) — calculate yours and compare rates across crypto exchanges on
         </p>
         <a
           href="https://tradefeecalc.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-2xl font-bold text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap px-4 py-1.5 rounded-lg border border-amber-700/40 bg-amber-900/15 hover:bg-amber-900/25"
+          className="self-start sm:self-auto flex-shrink-0 text-2xl font-bold text-amber-300 hover:text-amber-200 transition-colors px-4 py-1.5 rounded-lg border border-amber-700/40 bg-amber-900/15 hover:bg-amber-900/25"
           style={{ textShadow: "0 0 6px #fcd34d80" }}
         >
           tradefeecalc.com →
