@@ -14,9 +14,9 @@ function breakdownBy<K extends keyof Trade>(trades: Trade[], key: K) {
   return Object.entries(groups).sort((a, b) => b[1].total - a[1].total);
 }
 
-function BreakdownTable({ title, rows }: { title: string; rows: [string, { wins: number; total: number; pnl_r: number }][] }) {
+function BreakdownTable({ title, rows, padding }: { title: string; rows: [string, { wins: number; total: number; pnl_r: number }][]; padding: string }) {
   return (
-    <div>
+    <div className={padding}>
       <h3 className="text-sm font-semibold text-slate-300 mb-3">{title}</h3>
       <table className="w-full text-sm">
         <thead>
@@ -58,10 +58,10 @@ export default function PerformanceBreakdown({ trades }: { trades: Trade[] }) {
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
       <h2 className="text-lg font-semibold text-white mb-5">Performance Breakdown</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <BreakdownTable title="Symbol"    rows={bySymbol} />
-        <BreakdownTable title="System"    rows={bySystem} />
-        <BreakdownTable title="Direction" rows={byDirection} />
+      <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
+        <BreakdownTable title="Symbol"    rows={bySymbol}    padding="md:pr-6 pb-6 md:pb-0" />
+        <BreakdownTable title="System"    rows={bySystem}    padding="md:px-6 py-6 md:py-0" />
+        <BreakdownTable title="Direction" rows={byDirection} padding="md:pl-6 pt-6 md:pt-0" />
       </div>
     </div>
   );
