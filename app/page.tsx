@@ -14,11 +14,12 @@ import PerformanceBreakdown from "@/components/PerformanceBreakdown";
 export const dynamic = "force-dynamic";
 
 async function getData() {
-  const [tradesRaw, equityRaw, portfolioRaw, activeRaw] = await Promise.all([
+  const [tradesRaw, equityRaw, portfolioRaw, activeRaw, marketStateRaw] = await Promise.all([
     fetchFileFromGitHub("results/live_investment/trades.csv"),
     fetchFileFromGitHub("results/live_investment/equity.csv"),
     fetchFileFromGitHub("results/live_investment/portfolio.json"),
     fetchFileFromGitHub("results/live_investment/active_state.json").catch(() => "{}"),
+    fetchFileFromGitHub("results/live_investment/market_state.json").catch(() => "{}"),
   ]);
 
   const trades = Papa.parse<Trade>(tradesRaw, {
@@ -34,16 +35,18 @@ async function getData() {
   }).data.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 
   const portfolio: Portfolio = JSON.parse(portfolioRaw);
+  const marketState = JSON.parse(marketStateRaw);
+  const currentEquity: number = marketState.equity ?? portfolio.equity;
 
   const activeState = JSON.parse(activeRaw) as Record<string, { active_trade: unknown }>;
   const openTrades = Object.values(activeState).filter((v) => v.active_trade !== null).length;
 
-  return { trades, equity, portfolio, openTrades };
+  return { trades, equity, currentEquity, openTrades };
 }
 
 export default async function Dashboard() {
-  const { trades, equity, portfolio, openTrades } = await getData();
-  const stats   = computeStats(trades, equity, portfolio.equity);
+  const { trades, equity, currentEquity, openTrades } = await getData();
+  const stats   = computeStats(trades, equity, currentEquity);
   const monthly = computeMonthlyReturns(equity);
 
   return (
