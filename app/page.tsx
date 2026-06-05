@@ -12,10 +12,11 @@ import PerformanceBreakdown from "@/components/PerformanceBreakdown";
 export const dynamic = "force-dynamic";
 
 async function getData() {
-  const [tradesRaw, equityRaw, portfolioRaw] = await Promise.all([
+  const [tradesRaw, equityRaw, portfolioRaw, activeRaw] = await Promise.all([
     fetchFileFromGitHub("results/live_investment/trades.csv"),
     fetchFileFromGitHub("results/live_investment/equity.csv"),
     fetchFileFromGitHub("results/live_investment/portfolio.json"),
+    fetchFileFromGitHub("results/live_investment/active_state.json").catch(() => "{}"),
   ]);
 
   const trades = Papa.parse<Trade>(tradesRaw, {
@@ -32,11 +33,14 @@ async function getData() {
 
   const portfolio: Portfolio = JSON.parse(portfolioRaw);
 
-  return { trades, equity, portfolio };
+  const activeState = JSON.parse(activeRaw) as Record<string, { active_trade: unknown }>;
+  const openTrades = Object.values(activeState).filter((v) => v.active_trade !== null).length;
+
+  return { trades, equity, portfolio, openTrades };
 }
 
 export default async function Dashboard() {
-  const { trades, equity, portfolio } = await getData();
+  const { trades, equity, portfolio, openTrades } = await getData();
   const stats   = computeStats(trades, equity, portfolio.equity);
   const monthly = computeMonthlyReturns(equity);
 
@@ -61,7 +65,7 @@ export default async function Dashboard() {
       </div>
 
       {/* Stats bar */}
-      <StatsHeader stats={{ ...stats, openTrades: 0 }} />
+      <StatsHeader stats={{ ...stats, openTrades }} />
 
       {/* Live positions — client component, polls every 30s */}
       <LiveStatus />
