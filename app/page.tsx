@@ -75,7 +75,7 @@ export default async function Dashboard() {
       {/* Live positions + Equity curve side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <LiveStatus />
-        <EquityChart data={equity} trades={trades} />
+        <EquityChart data={equity} trades={trades} currentEquity={currentEquity} />
       </div>
 
       {/* Market state + Events feed */}
@@ -83,9 +83,11 @@ export default async function Dashboard() {
       <EventsFeed />
 
       {/* Monthly + Breakdown side by side on large screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <MonthlyReturns data={monthly} />
-        <PerformanceBreakdown trades={trades} />
+        <div className="lg:col-span-2">
+          <PerformanceBreakdown trades={trades} />
+        </div>
       </div>
 
       {/* Trade history */}

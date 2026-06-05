@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createChart, ColorType, LineStyle } from "lightweight-charts";
 import type { EquityPoint, Trade } from "@/types";
 
-export default function EquityChart({ data, trades }: { data: EquityPoint[]; trades: Trade[] }) {
+export default function EquityChart({ data, trades, currentEquity }: { data: EquityPoint[]; trades: Trade[]; currentEquity?: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,6 +53,14 @@ export default function EquityChart({ data, trades }: { data: EquityPoint[]; tra
 
     const allSorted = Array.from(seen.entries()).sort(([a], [b]) => a - b);
     if (allSorted.length === 0) return;
+
+    // Inject live current equity as a trailing point
+    if (currentEquity !== undefined) {
+      const nowTs = Math.floor(Date.now() / 1000);
+      const lastTs = allSorted[allSorted.length - 1][0];
+      if (nowTs > lastTs) allSorted.push([nowTs, currentEquity]);
+      else allSorted[allSorted.length - 1][1] = currentEquity;
+    }
 
     const points = [
       { time: (allSorted[0][0] - 86400) as number, value: 300 },
