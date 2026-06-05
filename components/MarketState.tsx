@@ -102,8 +102,11 @@ export default function MarketState() {
   if (!data) {
     return (
       <div className="bg-surface-card border border-surface-border rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-2">Market State</h2>
-        <p className="text-slate-500 text-sm">Waiting for first 15m tick...</p>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-white">Market State</h2>
+          <span className="text-xs text-slate-500">Updates every 15m</span>
+        </div>
+        <p className="text-slate-400 text-sm">Waiting for first 15m tick — data will appear automatically.</p>
       </div>
     );
   }

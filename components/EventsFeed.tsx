@@ -159,7 +159,7 @@ export default function EventsFeed() {
       </div>
 
       {events.length === 0 ? (
-        <p className="text-slate-500 text-sm">No events yet...</p>
+        <p className="text-slate-400 text-sm">No events yet — setups, opens, and closes will appear here in real time.</p>
       ) : (
         <div className="max-h-96 overflow-y-auto pr-1">
           {events.map((e, i) => <EventRow key={i} e={e} />)}

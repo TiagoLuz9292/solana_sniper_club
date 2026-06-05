@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { fetchFileFromGitHub } from "@/lib/github";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const raw = await fetchFileFromGitHub("results/live_investment/events.jsonl");
