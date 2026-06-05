@@ -131,9 +131,9 @@ export default function MarketState() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 divide-y xl:divide-y-0 xl:divide-x divide-slate-700">
         {/* ER ribbon */}
-        <div>
+        <div className="xl:pr-6 pb-6 xl:pb-0">
           <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">ER — Ribbon</h3>
           <table className="w-full text-sm">
             <thead>
@@ -163,7 +163,7 @@ export default function MarketState() {
         </div>
 
         {/* VW vs VWAP */}
-        <div>
+        <div className="xl:px-6 py-6 xl:py-0">
           <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">VW — vs VWAP</h3>
           <table className="w-full text-sm">
             <thead>
@@ -194,7 +194,7 @@ export default function MarketState() {
         </div>
 
         {/* HTF alignment */}
-        <div>
+        <div className="xl:pl-6 pt-6 xl:pt-0">
           <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">HTF Alignment</h3>
           <table className="w-full text-sm">
             <thead>
