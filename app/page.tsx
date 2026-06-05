@@ -69,15 +69,15 @@ export default async function Dashboard() {
       {/* Stats bar */}
       <StatsHeader stats={{ ...stats, openTrades }} />
 
-      {/* Live positions — client component, polls every 30s */}
-      <LiveStatus />
+      {/* Live positions + Equity curve side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <LiveStatus />
+        <EquityChart data={equity} trades={trades} />
+      </div>
 
-      {/* Market state + Events feed side by side */}
+      {/* Market state + Events feed */}
       <MarketState />
       <EventsFeed />
-
-      {/* Equity curve */}
-      <EquityChart data={equity} trades={trades} />
 
       {/* Monthly + Breakdown side by side on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
