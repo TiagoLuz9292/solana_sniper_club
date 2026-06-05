@@ -120,15 +120,7 @@ export default function MarketState() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Market State</h2>
-        <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span>bar {data.bar} · {formatTs(data.ts)}</span>
-          <span className="text-slate-600">|</span>
-          <span>eq <span className="text-white font-mono">${data.equity.toFixed(2)}</span></span>
-          <span className="text-slate-600">|</span>
-          <span>DD <span className={`font-mono ${data.dd_pct > 5 ? "text-amber-400" : "text-slate-300"}`}>{data.dd_pct.toFixed(1)}%</span> [{data.dd_tier}]</span>
-          <span className="text-slate-600">|</span>
-          <span>{lastUpdate ? `polled ${lastUpdate.toLocaleTimeString()}` : ""}</span>
-        </div>
+        <span className="text-xs text-slate-500">last tick · {formatTs(data.ts)}</span>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 divide-y xl:divide-y-0 xl:divide-x divide-slate-700">
