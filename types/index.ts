@@ -17,6 +17,7 @@ export interface Trade {
   candles_held: number;
   pnl_r: number;
   pnl_usd: number;
+  fee_usd?: number;
   equity_after: number;
   dd_pct: number;
 }

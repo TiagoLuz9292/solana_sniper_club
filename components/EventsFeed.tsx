@@ -19,6 +19,7 @@ interface BotEvent {
   outcome?: "win" | "loss" | "ambiguous";
   pnl_r?: number;
   pnl_usd?: number;
+  fee_usd?: number;
   candles_held?: number;
   equity_after?: number;
   dd_pct?: number;
@@ -115,6 +116,9 @@ function EventRow({ e }: { e: BotEvent }) {
               {e.pnl_r >= 0 ? "+" : ""}{e.pnl_r.toFixed(2)}R
               {e.pnl_usd !== undefined && ` ($${e.pnl_usd >= 0 ? "+" : ""}${e.pnl_usd.toFixed(2)})`}
             </span>
+          )}
+          {isClose && e.fee_usd !== undefined && e.fee_usd > 0 && (
+            <span className="text-amber-400/80">fee ${e.fee_usd.toFixed(4)}</span>
           )}
           {isClose && e.equity_after !== undefined && (
             <span>eq <span className="text-slate-300">${e.equity_after.toFixed(2)}</span></span>

@@ -121,6 +121,9 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                           <div><span className="text-slate-500">Bars held</span> {t.candles_held}</div>
                           <div><span className="text-slate-500">Entry type</span> {t.entry_type}</div>
                           <div><span className="text-slate-500">HTF aligned</span> {t.htf_multi_aligned ? "Yes" : "No"}</div>
+                          {t.fee_usd !== undefined && t.fee_usd > 0 && (
+                            <div><span className="text-slate-500">Fee paid</span> <span className="text-amber-400">${t.fee_usd.toFixed(4)}</span></div>
+                          )}
                           <div><span className="text-slate-500">DD after</span> {t.dd_pct.toFixed(2)}%</div>
                           <div><span className="text-slate-500">Equity after</span> ${t.equity_after.toFixed(2)}</div>
                         </div>
