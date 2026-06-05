@@ -40,12 +40,24 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
 
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
-      <div className="flex flex-wrap items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-end gap-3 mb-5">
         <h2 className="text-lg font-semibold text-white mr-2">Trade History</h2>
-        <Select value={filters.system}    onChange={set("system")}    options={["All", "ER", "VW"]} />
-        <Select value={filters.symbol}    onChange={set("symbol")}    options={symbols} />
-        <Select value={filters.direction} onChange={set("direction")} options={["All", "Long", "Short"]} />
-        <Select value={filters.outcome}   onChange={set("outcome")}   options={["All", "Win", "Loss"]} />
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs text-slate-500">System</span>
+          <Select value={filters.system}    onChange={set("system")}    options={["All", "ER", "VW"]} />
+        </label>
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs text-slate-500">Symbol</span>
+          <Select value={filters.symbol}    onChange={set("symbol")}    options={symbols} />
+        </label>
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs text-slate-500">Direction</span>
+          <Select value={filters.direction} onChange={set("direction")} options={["All", "Long", "Short"]} />
+        </label>
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs text-slate-500">Outcome</span>
+          <Select value={filters.outcome}   onChange={set("outcome")}   options={["All", "Win", "Loss"]} />
+        </label>
         <span className="text-xs text-slate-500 ml-auto">{filtered.length} trades</span>
       </div>
 
