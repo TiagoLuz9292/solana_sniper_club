@@ -31,7 +31,7 @@ async function fetchTicker(symbol: string): Promise<number | null> {
 function TradeCard({ tradeKey, trade, pnl }: { tradeKey: string; trade: ActiveTrade; pnl: number | null }) {
   const pnlColor = pnl === null ? "text-slate-400" : pnl >= 0 ? "text-emerald-400" : "text-red-400";
   return (
-    <div className="flex-shrink-0 bg-slate-800/50 border border-surface-border rounded-lg p-3 w-52">
+    <div className="w-full sm:flex-shrink-0 sm:w-52 bg-slate-800/50 border border-surface-border rounded-lg p-3">
       {/* Card header */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <span className="text-xs font-semibold text-brand-light">{trade.system}</span>
@@ -109,7 +109,7 @@ export default function LiveStatus() {
       {openTrades.length === 0 ? (
         <p className="text-slate-500 text-xs">No active positions — scanning market...</p>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <div className="flex flex-col sm:flex-row gap-3 sm:overflow-x-auto sm:pb-1">
           {openTrades.map(([key, { active_trade: t }]) => {
             if (!t) return null;
             return <TradeCard key={key} tradeKey={key} trade={t} pnl={pnlMap[t.symbol] ?? null} />;
