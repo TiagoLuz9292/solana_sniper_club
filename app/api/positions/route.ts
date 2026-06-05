@@ -30,6 +30,11 @@ export async function GET() {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (e) {
+    console.error("[positions]", String(e), {
+      keySet: !!process.env.BYBIT_API_KEY,
+      secretSet: !!process.env.BYBIT_API_SECRET,
+      baseUrl: process.env.BYBIT_BASE_URL,
+    });
     return NextResponse.json({ error: String(e), positions: [], walletBalance: null }, { status: 500 });
   }
 }

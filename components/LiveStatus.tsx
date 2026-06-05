@@ -18,20 +18,25 @@ export default function LiveStatus() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   async function refresh() {
-    try {
-      const [activeRes, posRes] = await Promise.all([
-        fetch("/api/active").then(r => r.json()),
-        fetch("/api/positions").then(r => r.json()),
-      ]);
-      setActive(activeRes);
+    // Fetch independently so Bybit failure never hides active trades
+    const [activeRes, posRes] = await Promise.allSettled([
+      fetch("/api/active").then(r => r.json()),
+      fetch("/api/positions").then(r => r.json()),
+    ]);
 
+    if (activeRes.status === "fulfilled" && !activeRes.value?.error) {
+      setActive(activeRes.value);
+    }
+
+    if (posRes.status === "fulfilled" && !posRes.value?.error) {
       const pnlMap: Record<string, number> = {};
-      for (const p of posRes.positions ?? []) {
+      for (const p of posRes.value.positions ?? []) {
         pnlMap[`${p.symbol}-${p.side}`] = parseFloat(p.unrealisedPnl ?? "0");
       }
       setLivePos(pnlMap);
-      setLastUpdate(new Date());
-    } catch {}
+    }
+
+    setLastUpdate(new Date());
   }
 
   useEffect(() => {
