@@ -1,5 +1,17 @@
 import type { Trade, EquityPoint, DashboardStats, MonthlyReturn } from "@/types";
 
+const TAKER = 0.00055; // 0.055% Bybit demo taker
+const MAKER = 0.0002;  // 0.020% Bybit demo maker
+
+export function computeEstimatedFees(trades: Trade[]): number {
+  return trades.reduce((total, t) => {
+    const qty = t.dollar_risk / Math.abs(t.fill_price - t.stop_loss);
+    const entryFee = qty * t.fill_price  * (t.entry_type === "limit" ? MAKER : TAKER);
+    const exitFee  = qty * t.exit_price  * (t.outcome   === "win"    ? MAKER : TAKER);
+    return total + entryFee + exitFee;
+  }, 0);
+}
+
 const STARTING_EQUITY = 300;
 
 export function computeStats(trades: Trade[], equity: EquityPoint[], currentEquity: number): DashboardStats {
