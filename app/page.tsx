@@ -4,6 +4,8 @@ import type { Trade, EquityPoint, Portfolio } from "@/types";
 import { computeStats, computeMonthlyReturns } from "@/lib/calculations";
 import StatsHeader from "@/components/StatsHeader";
 import LiveStatus from "@/components/LiveStatus";
+import EventsFeed from "@/components/EventsFeed";
+import MarketState from "@/components/MarketState";
 import EquityChart from "@/components/EquityChart";
 import MonthlyReturns from "@/components/MonthlyReturns";
 import TradeHistory from "@/components/TradeHistory";
@@ -69,6 +71,10 @@ export default async function Dashboard() {
 
       {/* Live positions — client component, polls every 30s */}
       <LiveStatus />
+
+      {/* Market state + Events feed side by side */}
+      <MarketState />
+      <EventsFeed />
 
       {/* Equity curve */}
       <EquityChart data={equity} trades={trades} />
