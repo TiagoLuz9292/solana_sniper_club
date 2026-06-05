@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { DashboardStats } from "@/types";
 
 function Stat({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
@@ -13,6 +14,23 @@ function Stat({ label, value, sub, color }: { label: string; value: string; sub?
 }
 
 export default function StatsHeader({ stats }: { stats: DashboardStats }) {
+  const [openTrades, setOpenTrades] = useState(stats.openTrades);
+
+  useEffect(() => {
+    async function poll() {
+      const res = await fetch("/api/active").then((r) => r.json()).catch(() => null);
+      if (res && !res.error) {
+        const count = Object.values(res).filter(
+          (v) => (v as { active_trade: unknown }).active_trade !== null
+        ).length;
+        setOpenTrades(count);
+      }
+    }
+    poll();
+    const id = setInterval(poll, 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   const returnColor = stats.totalReturnPct >= 0 ? "text-emerald-400" : "text-red-400";
   const returnSign  = stats.totalReturnPct >= 0 ? "+" : "";
 
@@ -44,8 +62,8 @@ export default function StatsHeader({ stats }: { stats: DashboardStats }) {
       />
       <Stat
         label="Open Trades"
-        value={String(stats.openTrades)}
-        color={stats.openTrades > 0 ? "text-brand-light" : "text-slate-400"}
+        value={String(openTrades)}
+        color={openTrades > 0 ? "text-brand-light" : "text-slate-400"}
       />
     </div>
   );
