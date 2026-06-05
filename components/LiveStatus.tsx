@@ -8,16 +8,15 @@ const BYBIT_PUBLIC = "https://api-demo.bybit.com/v5/market/tickers?category=line
 function DirectionBadge({ dir }: { dir: string }) {
   const isLong = dir === "long";
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${isLong ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
-      {isLong ? "▲ LONG" : "▼ SHORT"}
+    <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${isLong ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
+      {isLong ? "▲ L" : "▼ S"}
     </span>
   );
 }
 
-function calcPnl(t: ActiveTrade, currentPrice: number): number {
+function calcPnl(t: ActiveTrade, price: number): number {
   const qty = t.dollar_risk / Math.abs(t.fill_price - t.stop_loss);
-  const mult = t.direction === "long" ? 1 : -1;
-  return qty * (currentPrice - t.fill_price) * mult;
+  return qty * (price - t.fill_price) * (t.direction === "long" ? 1 : -1);
 }
 
 async function fetchTicker(symbol: string): Promise<number | null> {
@@ -26,9 +25,36 @@ async function fetchTicker(symbol: string): Promise<number | null> {
     const data = await res.json();
     const price = data?.result?.list?.[0]?.lastPrice;
     return price ? parseFloat(price) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
+}
+
+function TradeCard({ tradeKey, trade, pnl }: { tradeKey: string; trade: ActiveTrade; pnl: number | null }) {
+  const pnlColor = pnl === null ? "text-slate-400" : pnl >= 0 ? "text-emerald-400" : "text-red-400";
+  return (
+    <div className="flex-shrink-0 bg-slate-800/50 border border-surface-border rounded-lg p-3 w-52">
+      {/* Card header */}
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <span className="text-xs font-semibold text-brand-light">{trade.system}</span>
+        <span className="text-sm font-bold text-white">{trade.symbol.replace("USDT", "")}</span>
+        <DirectionBadge dir={trade.direction} />
+      </div>
+      {/* Price grid */}
+      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs font-mono">
+        <span className="text-slate-500">Entry</span>
+        <span className="text-white text-right">{trade.fill_price.toFixed(4)}</span>
+        <span className="text-slate-500">SL</span>
+        <span className="text-red-400 text-right">{trade.stop_loss.toFixed(4)}</span>
+        <span className="text-slate-500">TP</span>
+        <span className="text-emerald-400 text-right">{trade.take_profit.toFixed(4)}</span>
+        <span className="text-slate-500">Risk</span>
+        <span className="text-slate-300 text-right">${trade.dollar_risk.toFixed(2)}</span>
+      </div>
+      {/* PnL */}
+      <div className={`mt-2 pt-2 border-t border-surface-border/50 text-sm font-semibold text-right ${pnlColor}`}>
+        {pnl === null ? "—" : `${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`}
+      </div>
+    </div>
+  );
 }
 
 export default function LiveStatus() {
@@ -62,56 +88,32 @@ export default function LiveStatus() {
   const openTrades = Object.entries(active ?? {}).filter(([, v]) => v.active_trade !== null);
 
   return (
-    <div className="bg-surface-card border border-surface-border rounded-xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white">Live Positions</h2>
+    <div className="bg-surface-card border border-surface-border rounded-xl px-6 py-4">
+      <div className="flex items-center gap-3 mb-3">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${openTrades.length > 0 ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
-          <span className="text-xs text-slate-400">
-            {lastUpdate ? `Updated ${lastUpdate.toLocaleTimeString()}` : "Loading..."}
-          </span>
+          <h2 className="text-sm font-semibold text-white">
+            Open Trades
+            {openTrades.length > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 rounded bg-emerald-900/50 text-emerald-400 text-xs font-bold">
+                {openTrades.length}
+              </span>
+            )}
+          </h2>
         </div>
+        <span className="text-xs text-slate-500">
+          {lastUpdate ? `updated ${lastUpdate.toLocaleTimeString()}` : "loading..."}
+        </span>
       </div>
 
       {openTrades.length === 0 ? (
-        <p className="text-slate-500 text-sm">No active positions — scanning market...</p>
+        <p className="text-slate-500 text-xs">No active positions — scanning market...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-slate-400 text-xs uppercase border-b border-surface-border">
-                <th className="text-left pb-2">System</th>
-                <th className="text-left pb-2">Symbol</th>
-                <th className="text-left pb-2">Direction</th>
-                <th className="text-right pb-2">Entry</th>
-                <th className="text-right pb-2">SL</th>
-                <th className="text-right pb-2">TP</th>
-                <th className="text-right pb-2">Risk</th>
-                <th className="text-right pb-2">Unreal. PnL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {openTrades.map(([key, { active_trade: t }]) => {
-                if (!t) return null;
-                const pnl  = pnlMap[t.symbol] ?? null;
-                const pnlColor = pnl === null ? "text-slate-400" : pnl >= 0 ? "text-emerald-400" : "text-red-400";
-                return (
-                  <tr key={key} className="border-b border-surface-border/50 last:border-0">
-                    <td className="py-3 text-brand-light font-mono text-xs">{t.system}</td>
-                    <td className="py-3 font-semibold">{t.symbol.replace("USDT", "")}</td>
-                    <td className="py-3"><DirectionBadge dir={t.direction} /></td>
-                    <td className="py-3 text-right font-mono">{t.fill_price.toFixed(4)}</td>
-                    <td className="py-3 text-right font-mono text-red-400">{t.stop_loss.toFixed(4)}</td>
-                    <td className="py-3 text-right font-mono text-emerald-400">{t.take_profit.toFixed(4)}</td>
-                    <td className="py-3 text-right text-slate-300">${t.dollar_risk.toFixed(2)}</td>
-                    <td className={`py-3 text-right font-semibold ${pnlColor}`}>
-                      {pnl === null ? "—" : `${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {openTrades.map(([key, { active_trade: t }]) => {
+            if (!t) return null;
+            return <TradeCard key={key} tradeKey={key} trade={t} pnl={pnlMap[t.symbol] ?? null} />;
+          })}
         </div>
       )}
     </div>

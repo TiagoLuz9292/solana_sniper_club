@@ -54,12 +54,9 @@ export default function EquityChart({ data, trades, currentEquity }: { data: Equ
     const allSorted = Array.from(seen.entries()).sort(([a], [b]) => a - b);
     if (allSorted.length === 0) return;
 
-    // Inject live current equity as a trailing point
-    if (currentEquity !== undefined) {
-      const nowTs = Math.floor(Date.now() / 1000);
-      const lastTs = allSorted[allSorted.length - 1][0];
-      if (nowTs > lastTs) allSorted.push([nowTs, currentEquity]);
-      else allSorted[allSorted.length - 1][1] = currentEquity;
+    // Overwrite last point with real balance — absorbs fee gap silently
+    if (currentEquity !== undefined && allSorted.length > 0) {
+      allSorted[allSorted.length - 1][1] = currentEquity;
     }
 
     const points = [
