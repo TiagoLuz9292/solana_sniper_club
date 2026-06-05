@@ -27,7 +27,7 @@ export default function StatsHeader({ stats }: { stats: DashboardStats }) {
       ]);
       if (activeRes && !activeRes.error) {
         const count = Object.values(activeRes).filter(
-          (v) => (v as { active_trade: unknown }).active_trade !== null
+          (v) => !!(v as { active_trade?: unknown }).active_trade
         ).length;
         setOpenTrades(count);
       }

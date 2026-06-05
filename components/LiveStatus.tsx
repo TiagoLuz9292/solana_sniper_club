@@ -67,7 +67,7 @@ export default function LiveStatus() {
     if (activeRes && !activeRes.error) setActive(activeRes);
 
     const trades = Object.entries(activeRes ?? {})
-      .filter(([, v]: [string, unknown]) => (v as { active_trade: ActiveTrade | null }).active_trade !== null)
+      .filter(([, v]: [string, unknown]) => !!(v as { active_trade?: ActiveTrade }).active_trade)
       .map(([, v]) => (v as { active_trade: ActiveTrade }).active_trade);
 
     const newPnl: Record<string, number> = {};
@@ -85,7 +85,7 @@ export default function LiveStatus() {
     return () => clearInterval(id);
   }, []);
 
-  const openTrades = Object.entries(active ?? {}).filter(([, v]) => v.active_trade !== null);
+  const openTrades = Object.entries(active ?? {}).filter(([, v]) => !!v.active_trade);
 
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl px-6 py-4">
