@@ -41,19 +41,19 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
       {/* Fee callout */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 px-4 py-3 rounded-lg bg-brand/5 border border-brand/20">
+      <div className="mb-5 px-4 py-3 rounded-lg bg-amber-900/10 border border-amber-700/25">
         <p className="text-sm text-slate-300">
-          Exchange fees shown per trade — calculate yours and compare rates across crypto exchanges.
+          Exchange fees shown per trade (expand any row) — calculate yours and compare rates across crypto exchanges on{" "}
+          <a
+            href="https://tradefeecalc.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-base font-bold text-amber-300 hover:text-amber-200 transition-colors"
+            style={{ textShadow: "0 0 8px #fcd34d, 0 0 18px #f59e0b" }}
+          >
+            tradefeecalc.com →
+          </a>
         </p>
-        <a
-          href="https://tradefeecalc.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-shrink-0 text-sm font-semibold text-brand-light whitespace-nowrap hover:text-white transition-colors"
-          style={{ textShadow: "0 0 10px #a78bfa, 0 0 22px #7c3aed" }}
-        >
-          tradefeecalc.com →
-        </a>
       </div>
 
       <div className="flex flex-wrap items-end gap-3 mb-5">
@@ -81,6 +81,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-slate-400 text-xs uppercase border-b border-surface-border">
+              <th className="w-5 pb-2 pr-2"></th>
               <th className="text-left pb-2 pr-4">Date</th>
               <th className="text-left pb-2 pr-4">System</th>
               <th className="text-left pb-2 pr-4">Symbol</th>
@@ -103,6 +104,9 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                     onClick={() => toggle(i)}
                     className="border-b border-surface-border/40 hover:bg-white/5 cursor-pointer transition-colors"
                   >
+                    <td className="py-2 pr-2 text-slate-500">
+                      <span className={`inline-block text-xs transition-transform duration-150 ${isOpen ? "rotate-90" : ""}`}>▶</span>
+                    </td>
                     <td className="py-2 pr-4 text-slate-400 text-xs tabular-nums">
                       {new Date(t.close_ts).toLocaleDateString()}
                     </td>
@@ -129,7 +133,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                   </tr>
                   {isOpen && (
                     <tr key={`${t.close_ts}-${i}-detail`} className="bg-white/3 border-b border-surface-border/40">
-                      <td colSpan={9} className="px-4 py-3">
+                      <td colSpan={10} className="px-4 py-3">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-400">
                           <div><span className="text-slate-500">SL</span> {t.stop_loss.toFixed(5)}</div>
                           <div><span className="text-slate-500">TP</span> {t.take_profit.toFixed(5)} ({t.tp_r}R)</div>
