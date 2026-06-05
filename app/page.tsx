@@ -1,7 +1,7 @@
 import { fetchFileFromGitHub } from "@/lib/github";
 import Papa from "papaparse";
 import type { Trade, EquityPoint, Portfolio } from "@/types";
-import { computeStats, computeMonthlyReturns, computeEstimatedFees } from "@/lib/calculations";
+import { computeStats, computeMonthlyReturns } from "@/lib/calculations";
 import StatsHeader from "@/components/StatsHeader";
 import LiveStatus from "@/components/LiveStatus";
 import EventsFeed from "@/components/EventsFeed";
@@ -46,9 +46,8 @@ async function getData() {
 
 export default async function Dashboard() {
   const { trades, equity, currentEquity, openTrades } = await getData();
-  const stats        = computeStats(trades, equity, currentEquity);
-  const monthly      = computeMonthlyReturns(equity);
-  const estimatedFees = computeEstimatedFees(trades);
+  const stats   = computeStats(trades, equity, currentEquity);
+  const monthly = computeMonthlyReturns(equity);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
@@ -72,24 +71,6 @@ export default async function Dashboard() {
 
       {/* Stats bar */}
       <StatsHeader stats={{ ...stats, openTrades }} />
-
-      {/* Fee callout — contextual CTA to tradefeecalc.com */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 bg-surface-card border border-surface-border rounded-xl">
-        <p className="text-sm text-slate-300">
-          <span className="text-white font-semibold">${estimatedFees.toFixed(2)}</span>
-          {" "}paid in exchange fees across{" "}
-          <span className="text-white font-semibold">{stats.totalTrades} trades</span>
-          {" "}— fees are the silent profit killer.
-        </p>
-        <a
-          href="https://tradefeecalc.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-shrink-0 px-4 py-1.5 rounded-lg bg-brand/20 border border-brand/40 text-brand-light text-sm font-semibold hover:bg-brand/30 transition-colors"
-        >
-          Calculate yours →
-        </a>
-      </div>
 
       {/* Open trades — full width, thin horizontal cards */}
       <LiveStatus />
