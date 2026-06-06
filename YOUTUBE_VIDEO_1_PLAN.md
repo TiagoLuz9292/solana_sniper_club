@@ -149,7 +149,7 @@ Do a live calculation using one of the bot's actual trade parameters. Good examp
 - Entry: 1.1364, Exit: 1.1201
 - Show the result — entry fee + exit fee + round-trip total
 
-> "So on that one trade — roughly [X] in entry fees, [X] in exit fees, [X] total. The bot paid that on every single trade. Multiply it across 32 trades and you see why this isn't a rounding error."
+> "So on that one trade — roughly [X] in entry fees, [X] in exit fees, [X] total. Every trade has a different fee because the position size changes with each setup — smaller risk, smaller position, smaller fee. But it adds up. Expand any row in the trade history and you can see exactly what each trade cost. Across 32 trades that's real money quietly leaving the account."
 
 **Screen:** Navigate to a comparison page, e.g. Bybit vs MEXC.
 
