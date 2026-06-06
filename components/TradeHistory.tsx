@@ -139,6 +139,18 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                           <div><span className="text-slate-500">TP</span> {t.take_profit.toFixed(5)} ({t.tp_r}R)</div>
                           <div><span className="text-slate-500">Risk $</span> {t.dollar_risk.toFixed(2)}</div>
                           <div><span className="text-slate-500">Bars held</span> {t.candles_held}</div>
+                          {(() => {
+                            const dist = Math.abs(t.fill_price - t.stop_loss) / t.fill_price;
+                            if (dist <= 0) return null;
+                            const notional = Math.round(t.dollar_risk / dist);
+                            const margin   = Math.round(notional / 20);
+                            return (
+                              <>
+                                <div><span className="text-slate-500">Notional</span> ${notional.toLocaleString()}</div>
+                                <div><span className="text-slate-500">Margin</span> ${margin.toLocaleString()}</div>
+                              </>
+                            );
+                          })()}
                           <div><span className="text-slate-500">Entry type</span> {t.entry_type}</div>
                           <div><span className="text-slate-500">HTF aligned</span> {t.htf_multi_aligned ? "Yes" : "No"}</div>
                           {t.fee_usd !== undefined && t.fee_usd > 0 && (

@@ -108,6 +108,16 @@ function EventRow({ e }: { e: BotEvent }) {
           {(isSetup || isOpen) && e.dollar_risk !== undefined && (
             <span>risk <span className="text-slate-300">${e.dollar_risk.toFixed(2)}</span></span>
           )}
+          {(isSetup || isOpen) && (() => {
+            const price = e.fill_price ?? e.limit_price;
+            const dist  = price && e.stop_loss ? Math.abs(price - e.stop_loss) / price : 0;
+            if (!e.dollar_risk || dist <= 0) return null;
+            const notional = Math.round(e.dollar_risk / dist);
+            const margin   = Math.round(notional / 20);
+            return (
+              <span>pos <span className="text-slate-300">${margin}m / ${notional.toLocaleString()}n</span></span>
+            );
+          })()}
           {isClose && e.exit_price !== undefined && (
             <span>exit <span className="text-white">{e.exit_price.toFixed(5)}</span></span>
           )}
