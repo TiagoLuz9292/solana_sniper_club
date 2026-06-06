@@ -79,8 +79,8 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="text-slate-400 text-xs uppercase border-b border-surface-border">
+          <thead className="sticky top-0 z-10">
+            <tr className="text-slate-400 text-xs uppercase border-b border-surface-border bg-[#16161f]">
               <th className="w-5 pb-2 pr-2"></th>
               <th className="text-left pb-2 pr-4">Date</th>
               <th className="text-left pb-2 pr-4">System</th>
