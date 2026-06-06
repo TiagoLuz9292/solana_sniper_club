@@ -77,20 +77,20 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
         <span className="text-xs text-slate-500 ml-auto">{filtered.length} trades</span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto max-h-[40rem]">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="text-slate-400 text-xs uppercase border-b border-surface-border bg-[#16161f]">
-              <th className="w-5 pb-2 pr-2"></th>
-              <th className="text-left pb-2 pr-4">Date</th>
-              <th className="text-left pb-2 pr-4">System</th>
-              <th className="text-left pb-2 pr-4">Symbol</th>
-              <th className="text-left pb-2 pr-4">Dir</th>
-              <th className="text-right pb-2 pr-4">Entry</th>
-              <th className="text-right pb-2 pr-4">Exit</th>
-              <th className="text-right pb-2 pr-4">PnL (R)</th>
-              <th className="text-right pb-2 pr-4">PnL ($)</th>
-              <th className="text-right pb-2">Result</th>
+              <th className="w-5 pb-2 pr-2 bg-[#16161f]"></th>
+              <th className="text-left pb-2 pr-4 bg-[#16161f]">Date</th>
+              <th className="text-left pb-2 pr-4 bg-[#16161f]">System</th>
+              <th className="text-left pb-2 pr-4 bg-[#16161f]">Symbol</th>
+              <th className="text-left pb-2 pr-4 bg-[#16161f]">Dir</th>
+              <th className="text-right pb-2 pr-4 bg-[#16161f]">Entry</th>
+              <th className="text-right pb-2 pr-4 bg-[#16161f]">Exit</th>
+              <th className="text-right pb-2 pr-4 bg-[#16161f]">PnL (R)</th>
+              <th className="text-right pb-2 pr-4 bg-[#16161f]">PnL ($)</th>
+              <th className="text-right pb-2 bg-[#16161f]">Result</th>
             </tr>
           </thead>
           <tbody>

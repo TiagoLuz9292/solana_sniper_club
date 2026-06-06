@@ -28,7 +28,7 @@ async function fetchTicker(symbol: string): Promise<number | null> {
   } catch { return null; }
 }
 
-function TradeCard({ tradeKey, trade, pnl }: { tradeKey: string; trade: ActiveTrade; pnl: number | null }) {
+function TradeCard({ tradeKey, trade, pnl, price }: { tradeKey: string; trade: ActiveTrade; pnl: number | null; price: number | null }) {
   const pnlColor = pnl === null ? "text-slate-400" : pnl >= 0 ? "text-emerald-400" : "text-red-400";
   return (
     <div className="w-full sm:flex-shrink-0 sm:w-52 bg-slate-800/50 border border-surface-border rounded-lg p-3">
@@ -42,6 +42,8 @@ function TradeCard({ tradeKey, trade, pnl }: { tradeKey: string; trade: ActiveTr
       <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs font-mono">
         <span className="text-slate-500">Entry</span>
         <span className="text-white text-right">{trade.fill_price.toFixed(4)}</span>
+        <span className="text-slate-500">Now</span>
+        <span className="text-slate-200 text-right">{price !== null ? price.toFixed(4) : "—"}</span>
         <span className="text-slate-500">SL</span>
         <span className="text-red-400 text-right">{trade.stop_loss.toFixed(4)}</span>
         <span className="text-slate-500">TP</span>
@@ -60,6 +62,7 @@ function TradeCard({ tradeKey, trade, pnl }: { tradeKey: string; trade: ActiveTr
 export default function LiveStatus() {
   const [active, setActive] = useState<ActiveState | null>(null);
   const [pnlMap, setPnlMap] = useState<Record<string, number>>({});
+  const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   async function refresh() {
@@ -71,11 +74,16 @@ export default function LiveStatus() {
       .map(([, v]) => (v as { active_trade: ActiveTrade }).active_trade);
 
     const newPnl: Record<string, number> = {};
+    const newPrice: Record<string, number> = {};
     await Promise.all(trades.map(async (t) => {
       const price = await fetchTicker(t.symbol);
-      if (price !== null) newPnl[t.symbol] = calcPnl(t, price);
+      if (price !== null) {
+        newPnl[t.symbol] = calcPnl(t, price);
+        newPrice[t.symbol] = price;
+      }
     }));
     setPnlMap(newPnl);
+    setPriceMap(newPrice);
     setLastUpdate(new Date());
   }
 
@@ -112,7 +120,7 @@ export default function LiveStatus() {
         <div className="flex flex-col sm:flex-row gap-3 sm:overflow-x-auto sm:pb-1">
           {openTrades.map(([key, { active_trade: t }]) => {
             if (!t) return null;
-            return <TradeCard key={key} tradeKey={key} trade={t} pnl={pnlMap[t.symbol] ?? null} />;
+            return <TradeCard key={key} tradeKey={key} trade={t} pnl={pnlMap[t.symbol] ?? null} price={priceMap[t.symbol] ?? null} />;
           })}
         </div>
       )}
