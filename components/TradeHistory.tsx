@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Trade } from "@/types";
 
 type Filter = { system: string; symbol: string; direction: string; outcome: string };
 
 const INITIAL: Filter = { system: "All", symbol: "All", direction: "All", outcome: "All" };
+
+const COL_HEADERS: { label: string; className: string }[] = [
+  { label: "",        className: "w-5 pb-2 pr-2" },
+  { label: "Date",    className: "text-left pb-2 pr-4" },
+  { label: "System",  className: "text-left pb-2 pr-4" },
+  { label: "Symbol",  className: "text-left pb-2 pr-4" },
+  { label: "Dir",     className: "text-left pb-2 pr-4" },
+  { label: "Entry",   className: "text-right pb-2 pr-4" },
+  { label: "Exit",    className: "text-right pb-2 pr-4" },
+  { label: "PnL (R)", className: "text-right pb-2 pr-4" },
+  { label: "PnL ($)", className: "text-right pb-2 pr-4" },
+  { label: "Result",  className: "text-right pb-2" },
+];
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   return (
@@ -22,6 +35,37 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
 export default function TradeHistory({ trades }: { trades: Trade[] }) {
   const [filters, setFilters] = useState<Filter>(INITIAL);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [showSticky, setShowSticky] = useState(false);
+  const [colWidths, setColWidths] = useState<number[]>([]);
+  const [stickyLeft, setStickyLeft] = useState(0);
+  const [stickyWidth, setStickyWidth] = useState(0);
+
+  const cardRef     = useRef<HTMLDivElement>(null);
+  const theadRowRef = useRef<HTMLTableRowElement>(null);
+  const wrapRef     = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!theadRowRef.current || !cardRef.current || !wrapRef.current) return;
+      const headerBottom = theadRowRef.current.getBoundingClientRect().bottom;
+      const cardBottom   = cardRef.current.getBoundingClientRect().bottom;
+      const wrapRect     = wrapRef.current.getBoundingClientRect();
+      const show = headerBottom < 0 && cardBottom > 40;
+      if (show) {
+        const ths = Array.from(theadRowRef.current.querySelectorAll("th"));
+        setColWidths(ths.map(th => th.getBoundingClientRect().width));
+        setStickyLeft(wrapRect.left);
+        setStickyWidth(wrapRect.width);
+      }
+      setShowSticky(show);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   const set = (key: keyof Filter) => (v: string) => setFilters(f => ({ ...f, [key]: v }));
 
@@ -39,7 +83,29 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
     setExpanded(s => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; });
 
   return (
-    <div className="bg-surface-card border border-surface-border rounded-xl p-6">
+    <div ref={cardRef} className="bg-surface-card border border-surface-border rounded-xl p-6">
+
+      {/* Fixed sticky header clone — visible only when real header is above viewport */}
+      {showSticky && (
+        <div
+          className="fixed top-0 z-50 border-b border-surface-border overflow-hidden"
+          style={{ left: stickyLeft, width: stickyWidth, background: "#16161f" }}
+        >
+          <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse" }}>
+            <colgroup>
+              {colWidths.map((w, i) => <col key={i} style={{ width: w }} />)}
+            </colgroup>
+            <thead>
+              <tr className="text-slate-400 text-xs uppercase">
+                {COL_HEADERS.map((col, i) => (
+                  <th key={i} className={col.className}>{col.label}</th>
+                ))}
+              </tr>
+            </thead>
+          </table>
+        </div>
+      )}
+
       {/* Fee callout */}
       <div className="mb-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         <p className="text-sm text-emerald-400">
@@ -77,20 +143,13 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
         <span className="text-xs text-slate-500 ml-auto">{filtered.length} trades</span>
       </div>
 
-      <div className="overflow-x-auto overflow-y-auto max-h-[40rem]">
+      <div ref={wrapRef} className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10">
-            <tr className="text-slate-400 text-xs uppercase border-b border-surface-border bg-[#16161f]">
-              <th className="w-5 pb-2 pr-2 bg-[#16161f]"></th>
-              <th className="text-left pb-2 pr-4 bg-[#16161f]">Date</th>
-              <th className="text-left pb-2 pr-4 bg-[#16161f]">System</th>
-              <th className="text-left pb-2 pr-4 bg-[#16161f]">Symbol</th>
-              <th className="text-left pb-2 pr-4 bg-[#16161f]">Dir</th>
-              <th className="text-right pb-2 pr-4 bg-[#16161f]">Entry</th>
-              <th className="text-right pb-2 pr-4 bg-[#16161f]">Exit</th>
-              <th className="text-right pb-2 pr-4 bg-[#16161f]">PnL (R)</th>
-              <th className="text-right pb-2 pr-4 bg-[#16161f]">PnL ($)</th>
-              <th className="text-right pb-2 bg-[#16161f]">Result</th>
+          <thead>
+            <tr ref={theadRowRef} className="text-slate-400 text-xs uppercase border-b border-surface-border">
+              {COL_HEADERS.map((col, i) => (
+                <th key={i} className={col.className}>{col.label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
