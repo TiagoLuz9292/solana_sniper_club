@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { Trade } from "@/types";
+import { fmtPrice } from "@/lib/format";
 
 type Filter = { system: string; symbol: string; direction: string; outcome: string };
 
@@ -176,8 +177,8 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                         {t.direction === "long" ? "▲" : "▼"}
                       </span>
                     </td>
-                    <td className="py-2 pr-4 text-right font-mono text-xs">{t.fill_price.toFixed(4)}</td>
-                    <td className="py-2 pr-4 text-right font-mono text-xs">{t.exit_price.toFixed(4)}</td>
+                    <td className="py-2 pr-4 text-right font-mono text-xs">{fmtPrice(t.fill_price)}</td>
+                    <td className="py-2 pr-4 text-right font-mono text-xs">{fmtPrice(t.exit_price)}</td>
                     <td className={`py-2 pr-4 text-right font-semibold tabular-nums ${isWin ? "text-emerald-400" : "text-red-400"}`}>
                       {t.pnl_r >= 0 ? "+" : ""}{t.pnl_r.toFixed(1)}R
                     </td>
@@ -194,8 +195,8 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                     <tr key={`${t.close_ts}-${i}-detail`} className="bg-white/3 border-b border-surface-border/40">
                       <td colSpan={10} className="px-4 py-3">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-400">
-                          <div><span className="text-slate-500">SL</span> {t.stop_loss.toFixed(5)}</div>
-                          <div><span className="text-slate-500">TP</span> {t.take_profit.toFixed(5)} ({t.tp_r}R)</div>
+                          <div><span className="text-slate-500">SL</span> {fmtPrice(t.stop_loss)}</div>
+                          <div><span className="text-slate-500">TP</span> {fmtPrice(t.take_profit)} ({t.tp_r}R)</div>
                           <div><span className="text-slate-500">Risk $</span> {t.dollar_risk.toFixed(2)}</div>
                           <div><span className="text-slate-500">Bars held</span> {t.candles_held}</div>
                           {(() => {

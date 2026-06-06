@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ActiveState, ActiveTrade } from "@/types";
+import { fmtPrice } from "@/lib/format";
 
 const BYBIT_PUBLIC = "https://api-demo.bybit.com/v5/market/tickers?category=linear&symbol=";
 
@@ -41,13 +42,13 @@ function TradeCard({ tradeKey, trade, pnl, price }: { tradeKey: string; trade: A
       {/* Price grid */}
       <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs font-mono">
         <span className="text-slate-500">Entry</span>
-        <span className="text-white text-right">{trade.fill_price.toFixed(4)}</span>
+        <span className="text-white text-right">{fmtPrice(trade.fill_price)}</span>
         <span className="text-slate-500">Now</span>
-        <span className="text-slate-200 text-right">{price !== null ? price.toFixed(4) : "—"}</span>
+        <span className="text-slate-200 text-right">{price !== null ? fmtPrice(price) : "—"}</span>
         <span className="text-slate-500">SL</span>
-        <span className="text-red-400 text-right">{trade.stop_loss.toFixed(4)}</span>
+        <span className="text-red-400 text-right">{fmtPrice(trade.stop_loss)}</span>
         <span className="text-slate-500">TP</span>
-        <span className="text-emerald-400 text-right">{trade.take_profit.toFixed(4)}</span>
+        <span className="text-emerald-400 text-right">{fmtPrice(trade.take_profit)}</span>
         <span className="text-slate-500">Risk</span>
         <span className="text-slate-300 text-right">${trade.dollar_risk.toFixed(2)}</span>
       </div>

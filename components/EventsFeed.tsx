@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fmtPrice } from "@/lib/format";
 
 interface BotEvent {
   ts: string;
@@ -94,16 +95,16 @@ function EventRow({ e }: { e: BotEvent }) {
 
         <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-400 font-mono">
           {(isSetup || isOpen) && e.fill_price !== undefined && (
-            <span>fill <span className="text-white">{e.fill_price.toFixed(5)}</span></span>
+            <span>fill <span className="text-white">{fmtPrice(e.fill_price)}</span></span>
           )}
           {isSetup && e.limit_price !== undefined && e.entry_type === "limit" && (
-            <span>limit <span className="text-white">{e.limit_price.toFixed(5)}</span></span>
+            <span>limit <span className="text-white">{fmtPrice(e.limit_price)}</span></span>
           )}
           {(isSetup || isOpen) && e.stop_loss !== undefined && (
-            <span>SL <span className="text-red-400">{e.stop_loss.toFixed(5)}</span></span>
+            <span>SL <span className="text-red-400">{fmtPrice(e.stop_loss)}</span></span>
           )}
           {(isSetup || isOpen) && e.take_profit !== undefined && (
-            <span>TP <span className="text-emerald-400">{e.take_profit.toFixed(5)}</span> ({e.tp_r}R)</span>
+            <span>TP <span className="text-emerald-400">{fmtPrice(e.take_profit)}</span> ({e.tp_r}R)</span>
           )}
           {(isSetup || isOpen) && e.dollar_risk !== undefined && (
             <span>risk <span className="text-slate-300">${e.dollar_risk.toFixed(2)}</span></span>
@@ -119,7 +120,7 @@ function EventRow({ e }: { e: BotEvent }) {
             );
           })()}
           {isClose && e.exit_price !== undefined && (
-            <span>exit <span className="text-white">{e.exit_price.toFixed(5)}</span></span>
+            <span>exit <span className="text-white">{fmtPrice(e.exit_price)}</span></span>
           )}
           {isClose && e.pnl_r !== undefined && (
             <span className={pnlColor}>
