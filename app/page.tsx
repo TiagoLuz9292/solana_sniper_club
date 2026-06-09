@@ -54,33 +54,37 @@ export default async function Dashboard() {
     <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Solana Sniper Club</h1>
-          <p className="text-slate-400 text-sm mt-0.5">Automated Bybit Futures Bot — Live Performance</p>
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-2">
+        {/* Row 1: title + badges */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Solana Sniper Club</h1>
           <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full bg-amber-900/60 border border-amber-700 text-amber-300 text-xs font-semibold tracking-wide">
+              DEMO
+            </span>
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-900/40 border border-emerald-800 text-emerald-400 text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE
+            </span>
+          </div>
+        </div>
+        {/* Row 2: subtitle + social icons */}
+        <div className="flex items-center justify-between">
+          <p className="text-slate-400 text-sm">Automated Bybit Futures Bot — Live Performance</p>
+          <div className="flex items-center gap-3">
             <a href="https://www.youtube.com/@SolanaSniperClub" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-red-500 transition-colors">
-              <FaYoutube size={20} />
+              <FaYoutube size={18} />
             </a>
             <a href="https://twitter.com/sol_sniper_club" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-              <FaXTwitter size={18} />
+              <FaXTwitter size={16} />
             </a>
             <a href="https://www.tiktok.com/@sol_sniper_club" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-              <FaTiktok size={18} />
+              <FaTiktok size={16} />
             </a>
-            <a href="https://tradefeecalc.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-200 transition-colors text-xs font-medium">
+            <a href="https://tradefeecalc.com" target="_blank" rel="noopener noreferrer" className="hidden sm:block text-slate-400 hover:text-slate-200 transition-colors text-xs font-medium">
               tradefeecalc.com
             </a>
           </div>
-          <span className="px-3 py-1 rounded-full bg-amber-900/60 border border-amber-700 text-amber-300 text-xs font-semibold tracking-wide">
-            DEMO ACCOUNT
-          </span>
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/40 border border-emerald-800 text-emerald-400 text-xs font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE
-          </span>
         </div>
       </div>
 
