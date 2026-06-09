@@ -1,3 +1,4 @@
+import { FaYoutube, FaXTwitter, FaTiktok } from "react-icons/fa6";
 import { fetchFileFromGitHub } from "@/lib/github";
 import Papa from "papaparse";
 import type { Trade, EquityPoint, Portfolio } from "@/types";
@@ -59,6 +60,20 @@ export default async function Dashboard() {
           <p className="text-slate-400 text-sm mt-0.5">Automated Bybit Futures Bot — Live Performance</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <a href="https://www.youtube.com/@SolanaSniperClub" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-red-500 transition-colors">
+              <FaYoutube size={20} />
+            </a>
+            <a href="https://twitter.com/sol_sniper_club" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
+              <FaXTwitter size={18} />
+            </a>
+            <a href="https://www.tiktok.com/@solana.sniper.clu" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
+              <FaTiktok size={18} />
+            </a>
+            <a href="https://tradefeecalc.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-200 transition-colors text-xs font-medium">
+              tradefeecalc.com
+            </a>
+          </div>
           <span className="px-3 py-1 rounded-full bg-amber-900/60 border border-amber-700 text-amber-300 text-xs font-semibold tracking-wide">
             DEMO ACCOUNT
           </span>
@@ -96,13 +111,8 @@ export default async function Dashboard() {
       <TradeHistory trades={trades} />
 
       {/* Footer */}
-      <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border space-y-1">
-        <div>Demo account · All results are simulated with real market prices · Not financial advice</div>
-        <div className="flex justify-center gap-4">
-          <a href="https://tradefeecalc.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">tradefeecalc.com</a>
-          <a href="https://www.youtube.com/@SolanaSniperClub" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">YouTube</a>
-          <a href="https://twitter.com/sol_sniper_club" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">@sol_sniper_club</a>
-        </div>
+      <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
+        Demo account · All results are simulated with real market prices · Not financial advice
       </footer>
     </main>
   );
