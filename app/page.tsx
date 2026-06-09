@@ -111,8 +111,14 @@ export default async function Dashboard() {
       <TradeHistory trades={trades} />
 
       {/* Footer */}
-      <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
-        Demo account · All results are simulated with real market prices · Not financial advice
+      <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border space-y-2">
+        <div>Demo account · All results are simulated with real market prices · Not financial advice</div>
+        <div className="flex justify-center items-center gap-4">
+          <a href="https://tradefeecalc.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">tradefeecalc.com</a>
+          <a href="https://www.youtube.com/@SolanaSniperClub" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors"><FaYoutube size={16} /></a>
+          <a href="https://twitter.com/sol_sniper_club" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors"><FaXTwitter size={14} /></a>
+          <a href="https://www.tiktok.com/@sol_sniper_club" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors"><FaTiktok size={14} /></a>
+        </div>
       </footer>
     </main>
   );
