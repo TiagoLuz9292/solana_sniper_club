@@ -113,7 +113,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
           Exchange fees shown per trade (expand any row) — calculate yours and compare rates across crypto exchanges on
         </p>
         <a
-          href="https://tradefeecalc.com"
+          href="https://tradefeecalc.com/calculators/bybit-trading-fee-calculator"
           target="_blank"
           rel="noopener noreferrer"
           className="self-start sm:self-auto flex-shrink-0 text-2xl font-bold text-amber-300 hover:text-amber-200 transition-colors px-4 py-1.5 rounded-lg border border-amber-700/40 bg-amber-900/15 hover:bg-amber-900/25"
