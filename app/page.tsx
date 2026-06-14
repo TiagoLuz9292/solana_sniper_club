@@ -40,7 +40,7 @@ async function getData() {
   const currentEquity: number = marketState.equity ?? portfolio.equity;
 
   const activeState = JSON.parse(activeRaw) as Record<string, { active_trade: unknown }>;
-  const openTrades = Object.values(activeState).filter((v) => v.active_trade !== null).length;
+  const openTrades = Object.values(activeState).filter((v) => !!v.active_trade).length;
 
   return { trades, equity, currentEquity, openTrades };
 }
