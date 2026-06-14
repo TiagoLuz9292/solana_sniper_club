@@ -13,17 +13,23 @@ function Stat({ label, value, sub, color }: { label: string; value: string; sub?
   );
 }
 
-const STARTING_EQUITY = 300;
-
-export default function StatsHeader({ stats }: { stats: DashboardStats }) {
+export default function StatsHeader({
+  stats,
+  activeApiPath = "/api/active",
+  marketStateApiPath = "/api/market-state",
+}: {
+  stats: DashboardStats;
+  activeApiPath?: string;
+  marketStateApiPath?: string;
+}) {
   const [openTrades, setOpenTrades] = useState(stats.openTrades);
   const [liveEquity, setLiveEquity] = useState(stats.currentEquity);
 
   useEffect(() => {
     async function poll() {
       const [activeRes, marketRes] = await Promise.all([
-        fetch("/api/active").then((r) => r.json()).catch(() => null),
-        fetch("/api/market-state").then((r) => r.json()).catch(() => null),
+        fetch(activeApiPath).then((r) => r.json()).catch(() => null),
+        fetch(marketStateApiPath).then((r) => r.json()).catch(() => null),
       ]);
       if (activeRes && !activeRes.error) {
         const count = Object.values(activeRes).filter(
@@ -40,7 +46,7 @@ export default function StatsHeader({ stats }: { stats: DashboardStats }) {
     return () => clearInterval(id);
   }, []);
 
-  const totalReturnPct = ((liveEquity - STARTING_EQUITY) / STARTING_EQUITY) * 100;
+  const totalReturnPct = ((liveEquity - stats.startingEquity) / stats.startingEquity) * 100;
   const returnColor = totalReturnPct >= 0 ? "text-emerald-400" : "text-red-400";
   const returnSign  = totalReturnPct >= 0 ? "+" : "";
 

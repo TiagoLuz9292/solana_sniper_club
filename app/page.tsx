@@ -3,6 +3,7 @@ import { fetchFileFromGitHub } from "@/lib/github";
 import Papa from "papaparse";
 import type { Trade, EquityPoint, Portfolio } from "@/types";
 import { computeStats, computeMonthlyReturns } from "@/lib/calculations";
+import TabNav from "@/components/TabNav";
 import StatsHeader from "@/components/StatsHeader";
 import LiveStatus from "@/components/LiveStatus";
 import EventsFeed from "@/components/EventsFeed";
@@ -87,6 +88,9 @@ export default async function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Tab navigation */}
+      <TabNav />
 
       {/* Stats bar */}
       <StatsHeader stats={{ ...stats, openTrades }} />

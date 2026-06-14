@@ -146,12 +146,12 @@ function EventRow({ e }: { e: BotEvent }) {
   );
 }
 
-export default function EventsFeed() {
+export default function EventsFeed({ apiPath = "/api/events" }: { apiPath?: string }) {
   const [events, setEvents] = useState<BotEvent[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   async function refresh() {
-    const data = await fetch("/api/events").then((r) => r.json()).catch(() => null);
+    const data = await fetch(apiPath).then((r) => r.json()).catch(() => null);
     if (Array.isArray(data)) {
       setEvents(data.slice(0, MAX_DISPLAY));
       setLastUpdate(new Date());

@@ -60,14 +60,14 @@ function TradeCard({ tradeKey, trade, pnl, price }: { tradeKey: string; trade: A
   );
 }
 
-export default function LiveStatus() {
+export default function LiveStatus({ activeApiPath = "/api/active" }: { activeApiPath?: string }) {
   const [active, setActive] = useState<ActiveState | null>(null);
   const [pnlMap, setPnlMap] = useState<Record<string, number>>({});
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   async function refresh() {
-    const activeRes = await fetch("/api/active").then(r => r.json()).catch(() => null);
+    const activeRes = await fetch(activeApiPath).then(r => r.json()).catch(() => null);
     if (activeRes && !activeRes.error) setActive(activeRes);
 
     const trades = Object.entries(activeRes ?? {})

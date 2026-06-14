@@ -14,7 +14,12 @@ export function computeEstimatedFees(trades: Trade[]): number {
 
 const STARTING_EQUITY = 300;
 
-export function computeStats(trades: Trade[], equity: EquityPoint[], currentEquity: number): DashboardStats {
+export function computeStats(
+  trades: Trade[],
+  equity: EquityPoint[],
+  currentEquity: number,
+  startingEquity = STARTING_EQUITY,
+): DashboardStats {
   const closed = trades;
   const wins   = closed.filter(t => t.outcome === "win");
   const losses = closed.filter(t => t.outcome === "loss");
@@ -29,8 +34,8 @@ export function computeStats(trades: Trade[], equity: EquityPoint[], currentEqui
 
   return {
     currentEquity,
-    startingEquity:  STARTING_EQUITY,
-    totalReturnPct:  ((currentEquity - STARTING_EQUITY) / STARTING_EQUITY) * 100,
+    startingEquity,
+    totalReturnPct:  ((currentEquity - startingEquity) / startingEquity) * 100,
     winRate:         closed.length > 0 ? (wins.length / closed.length) * 100 : 0,
     profitFactor:    grossLoss > 0 ? grossWin / grossLoss : grossWin > 0 ? Infinity : 0,
     maxDrawdown:     maxDD,

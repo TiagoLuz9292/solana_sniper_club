@@ -1,6 +1,6 @@
 export interface Trade {
   close_ts: string;
-  system: "ER" | "VW";
+  system: "ER" | "VW" | "S1";
   symbol: string;
   direction: "long" | "short";
   entry_type: "limit" | "market";
