@@ -36,7 +36,7 @@ function TradeCard({ tradeKey, trade, pnl, price }: { tradeKey: string; trade: A
       {/* Card header */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <span className="text-xs font-semibold text-brand-light">{trade.system}</span>
-        <span className="text-sm font-bold text-white">{trade.symbol.replace("USDT", "")}</span>
+        <span className="text-sm font-bold text-white">{trade.symbol?.replace("USDT", "") ?? "—"}</span>
         <DirectionBadge dir={trade.direction} />
       </div>
       {/* Price grid */}

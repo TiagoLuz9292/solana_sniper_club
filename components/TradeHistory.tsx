@@ -171,7 +171,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                       {new Date(t.close_ts).toLocaleDateString()}
                     </td>
                     <td className="py-2 pr-4 text-brand-light font-mono text-xs">{t.system}</td>
-                    <td className="py-2 pr-4 font-semibold">{t.symbol.replace("USDT", "")}</td>
+                    <td className="py-2 pr-4 font-semibold">{t.symbol?.replace("USDT", "") ?? "—"}</td>
                     <td className="py-2 pr-4">
                       <span className={`text-xs font-semibold ${t.direction === "long" ? "text-emerald-400" : "text-red-400"}`}>
                         {t.direction === "long" ? "▲" : "▼"}
@@ -187,7 +187,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                     </td>
                     <td className="py-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${isWin ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
-                        {t.outcome.toUpperCase()}
+                        {t.outcome?.toUpperCase() ?? "—"}
                       </span>
                     </td>
                   </tr>

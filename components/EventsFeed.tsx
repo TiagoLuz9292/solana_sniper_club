@@ -88,7 +88,7 @@ function EventRow({ e }: { e: BotEvent }) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-slate-400 font-mono">{formatTs(e.ts)}</span>
           <span className="text-xs font-semibold text-brand-light">{e.system}</span>
-          <span className="text-sm font-bold text-white">{e.symbol.replace("USDT", "")}</span>
+          <span className="text-sm font-bold text-white">{e.symbol?.replace("USDT", "") ?? "—"}</span>
           {directionTag(e.direction)}
           <span className="text-xs text-slate-300">{eventLabel(e)}</span>
         </div>

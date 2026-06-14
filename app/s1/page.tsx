@@ -44,13 +44,16 @@ async function getData() {
   const activeState = JSON.parse(activeRaw);
   const marketState = JSON.parse(marketRaw);
 
-  const currentEquity: number =
+  const rawEquity =
     marketState.equity ??
-    (equity.length > 0 ? equity[equity.length - 1].equity : 0);
+    (equity.length > 0 ? equity[equity.length - 1].equity : null);
+  const currentEquity: number =
+    rawEquity != null && isFinite(rawEquity) ? rawEquity : 0;
 
   // Starting equity = account balance when S1 first launched (first row of equity_s1.csv)
+  const rawStart = equity.length > 0 ? equity[0].equity : null;
   const startingEquity: number =
-    equity.length > 0 ? equity[0].equity : currentEquity;
+    rawStart != null && isFinite(rawStart) && rawStart > 0 ? rawStart : currentEquity || 300;
 
   const openTrades = Object.values(activeState).filter(
     (v) => !!(v as { active_trade?: unknown }).active_trade

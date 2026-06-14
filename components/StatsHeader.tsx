@@ -22,8 +22,8 @@ export default function StatsHeader({
   activeApiPath?: string;
   marketStateApiPath?: string;
 }) {
-  const [openTrades, setOpenTrades] = useState(stats.openTrades);
-  const [liveEquity, setLiveEquity] = useState(stats.currentEquity);
+  const [openTrades, setOpenTrades] = useState(stats.openTrades ?? 0);
+  const [liveEquity, setLiveEquity] = useState((stats.currentEquity ?? 0) as number);
 
   useEffect(() => {
     async function poll() {
@@ -65,7 +65,7 @@ export default function StatsHeader({
       />
       <Stat
         label="Win Rate"
-        value={`${stats.winRate.toFixed(1)}%`}
+        value={`${(stats.winRate ?? 0).toFixed(1)}%`}
         sub={`${stats.totalTrades} closed trades`}
       />
       <Stat

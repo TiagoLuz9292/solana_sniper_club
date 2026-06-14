@@ -55,12 +55,14 @@ export default function EquityChart({ data, trades, currentEquity, startingEquit
     if (allSorted.length === 0) return;
 
     // Overwrite last point with real balance — absorbs fee gap silently
-    if (currentEquity !== undefined && allSorted.length > 0) {
-      allSorted[allSorted.length - 1][1] = currentEquity;
+    const safeCurrentEquity = (currentEquity != null && isFinite(currentEquity as number)) ? currentEquity : null;
+    if (safeCurrentEquity !== null && allSorted.length > 0) {
+      allSorted[allSorted.length - 1][1] = safeCurrentEquity;
     }
 
+    const safeStart = (startingEquity != null && isFinite(startingEquity as number) && startingEquity > 0) ? startingEquity : 300;
     const points = [
-      { time: (allSorted[0][0] - 86400) as number, value: startingEquity },
+      { time: (allSorted[0][0] - 86400) as number, value: safeStart },
       ...allSorted.map(([time, value]) => ({ time: time as number, value })),
     ];
     series.setData(points as Parameters<typeof series.setData>[0]);
