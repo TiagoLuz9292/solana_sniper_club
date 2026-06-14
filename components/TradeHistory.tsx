@@ -187,7 +187,7 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                     </td>
                     <td className="py-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${isWin ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
-                        {typeof t.outcome === "string" ? t.outcome.toUpperCase() : "—"}
+                        {t.outcome?.toString().toUpperCase() ?? "—"}
                       </span>
                     </td>
                   </tr>
