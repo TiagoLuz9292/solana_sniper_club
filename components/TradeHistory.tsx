@@ -180,10 +180,10 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                     <td className="py-2 pr-4 text-right font-mono text-xs">{fmtPrice(t.fill_price)}</td>
                     <td className="py-2 pr-4 text-right font-mono text-xs">{fmtPrice(t.exit_price)}</td>
                     <td className={`py-2 pr-4 text-right font-semibold tabular-nums ${isWin ? "text-emerald-400" : "text-red-400"}`}>
-                      {t.pnl_r >= 0 ? "+" : ""}{t.pnl_r.toFixed(1)}R
+                      {(t.pnl_r ?? 0) >= 0 ? "+" : ""}{(t.pnl_r ?? 0).toFixed(1)}R
                     </td>
                     <td className={`py-2 pr-4 text-right font-semibold tabular-nums ${isWin ? "text-emerald-400" : "text-red-400"}`}>
-                      {t.pnl_usd >= 0 ? "+$" : "-$"}{Math.abs(t.pnl_usd).toFixed(2)}
+                      {(t.pnl_usd ?? 0) >= 0 ? "+$" : "-$"}{Math.abs(t.pnl_usd ?? 0).toFixed(2)}
                     </td>
                     <td className="py-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${isWin ? "bg-emerald-900 text-emerald-300" : "bg-red-900 text-red-300"}`}>
@@ -197,8 +197,8 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-400">
                           <div><span className="text-slate-500">SL</span> {fmtPrice(t.stop_loss)}</div>
                           <div><span className="text-slate-500">TP</span> {fmtPrice(t.take_profit)} ({t.tp_r}R)</div>
-                          <div><span className="text-slate-500">Risk $</span> {t.dollar_risk.toFixed(2)}</div>
-                          <div><span className="text-slate-500">Bars held</span> {t.candles_held}</div>
+                          <div><span className="text-slate-500">Risk $</span> {(t.dollar_risk ?? 0).toFixed(2)}</div>
+                          <div><span className="text-slate-500">Bars held</span> {t.candles_held ?? "—"}</div>
                           {(() => {
                             const dist = Math.abs(t.fill_price - t.stop_loss) / t.fill_price;
                             if (dist <= 0) return null;
@@ -216,8 +216,8 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
                           {t.fee_usd !== undefined && t.fee_usd > 0 && (
                             <div><span className="text-slate-500">Fee paid</span> <span className="text-amber-400">${t.fee_usd.toFixed(4)}</span></div>
                           )}
-                          <div><span className="text-slate-500">DD after</span> {t.dd_pct.toFixed(2)}%</div>
-                          <div><span className="text-slate-500">Equity after</span> ${t.equity_after.toFixed(2)}</div>
+                          <div><span className="text-slate-500">DD after</span> {(t.dd_pct ?? 0).toFixed(2)}%</div>
+                          <div><span className="text-slate-500">Equity after</span> ${(t.equity_after ?? 0).toFixed(2)}</div>
                         </div>
                       </td>
                     </tr>

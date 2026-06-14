@@ -46,7 +46,8 @@ export default function StatsHeader({
     return () => clearInterval(id);
   }, []);
 
-  const totalReturnPct = ((liveEquity - stats.startingEquity) / stats.startingEquity) * 100;
+  const startEq = stats.startingEquity || 300;
+  const totalReturnPct = ((liveEquity - startEq) / startEq) * 100;
   const returnColor = totalReturnPct >= 0 ? "text-emerald-400" : "text-red-400";
   const returnSign  = totalReturnPct >= 0 ? "+" : "";
 
@@ -54,8 +55,8 @@ export default function StatsHeader({
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 p-6 bg-surface-card border border-surface-border rounded-xl">
       <Stat
         label="Total Return"
-        value={`${returnSign}${totalReturnPct.toFixed(1)}%`}
-        sub={`$${stats.startingEquity} → $${liveEquity.toFixed(0)}`}
+        value={isFinite(totalReturnPct) ? `${returnSign}${totalReturnPct.toFixed(1)}%` : "—"}
+        sub={`$${startEq} → $${liveEquity.toFixed(0)}`}
         color={returnColor}
       />
       <Stat
@@ -73,7 +74,7 @@ export default function StatsHeader({
       />
       <Stat
         label="Max Drawdown"
-        value={`-${stats.maxDrawdown.toFixed(1)}%`}
+        value={`-${(stats.maxDrawdown ?? 0).toFixed(1)}%`}
         color="text-amber-400"
       />
       <Stat

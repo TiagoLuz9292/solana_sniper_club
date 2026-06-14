@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createChart, ColorType, LineStyle } from "lightweight-charts";
 import type { EquityPoint, Trade } from "@/types";
 
-export default function EquityChart({ data, trades, currentEquity }: { data: EquityPoint[]; trades: Trade[]; currentEquity?: number }) {
+export default function EquityChart({ data, trades, currentEquity, startingEquity = 300 }: { data: EquityPoint[]; trades: Trade[]; currentEquity?: number; startingEquity?: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,13 +42,13 @@ export default function EquityChart({ data, trades, currentEquity }: { data: Equ
     );
     for (const t of sortedTrades) {
       const ts = Math.floor(new Date(t.close_ts).getTime() / 1000);
-      seen.set(ts, t.equity_after);
+      if (!isNaN(ts) && t.equity_after != null && isFinite(t.equity_after)) seen.set(ts, t.equity_after);
     }
 
     // Second pass: equity.csv (overwrites with its values where they exist)
     for (const pt of data) {
       const ts = Math.floor(new Date(pt.ts).getTime() / 1000);
-      seen.set(ts, pt.equity);
+      if (!isNaN(ts) && pt.equity != null && isFinite(pt.equity)) seen.set(ts, pt.equity);
     }
 
     const allSorted = Array.from(seen.entries()).sort(([a], [b]) => a - b);
@@ -60,7 +60,7 @@ export default function EquityChart({ data, trades, currentEquity }: { data: Equ
     }
 
     const points = [
-      { time: (allSorted[0][0] - 86400) as number, value: 300 },
+      { time: (allSorted[0][0] - 86400) as number, value: startingEquity },
       ...allSorted.map(([time, value]) => ({ time: time as number, value })),
     ];
     series.setData(points as Parameters<typeof series.setData>[0]);
@@ -73,7 +73,7 @@ export default function EquityChart({ data, trades, currentEquity }: { data: Equ
     ro.observe(containerRef.current);
 
     return () => { chart.remove(); ro.disconnect(); };
-  }, [data, trades]);
+  }, [data, trades, startingEquity]);
 
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">

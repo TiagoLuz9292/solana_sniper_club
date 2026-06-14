@@ -8,7 +8,8 @@
  * DOGE     (≥0.01) → 5 dp   e.g. 0.08420
  * sub-cent          → 6 dp
  */
-export function fmtPrice(price: number): string {
+export function fmtPrice(price: number | null | undefined): string {
+  if (price == null || !isFinite(price)) return "—";
   const dp =
     price >= 1000 ? 2 :
     price >= 10   ? 3 :

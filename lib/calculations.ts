@@ -24,12 +24,12 @@ export function computeStats(
   const wins   = closed.filter(t => t.outcome === "win");
   const losses = closed.filter(t => t.outcome === "loss");
 
-  const grossWin  = wins.reduce((s, t)   => s + t.pnl_usd, 0);
-  const grossLoss = losses.reduce((s, t) => s + Math.abs(t.pnl_usd), 0);
+  const grossWin  = wins.reduce((s, t)   => s + (t.pnl_usd ?? 0), 0);
+  const grossLoss = losses.reduce((s, t) => s + Math.abs(t.pnl_usd ?? 0), 0);
 
   // Use trades.csv dd_pct — equity.csv may be missing early data points
-  const maxDDFromTrades = closed.reduce((m, t) => Math.max(m, t.dd_pct), 0);
-  const maxDDFromEquity = equity.reduce((m, e)  => Math.max(m, e.dd_pct), 0);
+  const maxDDFromTrades = closed.reduce((m, t) => Math.max(m, t.dd_pct ?? 0), 0);
+  const maxDDFromEquity = equity.reduce((m, e)  => Math.max(m, e.dd_pct ?? 0), 0);
   const maxDD = Math.max(maxDDFromTrades, maxDDFromEquity);
 
   return {

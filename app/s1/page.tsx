@@ -101,7 +101,7 @@ export default async function S1Dashboard() {
 
       {/* Equity curve + Events feed */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <EquityChart data={equity} trades={trades} currentEquity={currentEquity} />
+        <EquityChart data={equity} trades={trades} currentEquity={currentEquity} startingEquity={startingEquity} />
         <EventsFeed apiPath="/api/s1/events" />
       </div>
 
