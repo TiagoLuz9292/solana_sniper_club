@@ -24,7 +24,7 @@ async function getData() {
       fetchOkxFile("results/live_investment/equity_s1.csv").catch(() => ""),
       fetchFileFromGitHub("results/live_investment/active_state.json").catch(() => "{}"),
       fetchOkxFile("results/live_investment/active_state_s1.json").catch(() => "{}"),
-      fetchOkxFile("results/live_investment/market_state_s1.json").catch(() => "{}"),
+      fetchFileFromGitHub("results/live_investment/market_state.json").catch(() => "{}"),
     ]);
 
   // All trades — ER + VW + S1 combined
