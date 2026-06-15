@@ -7,8 +7,9 @@ export default function TabNav() {
   const path = usePathname();
 
   const tabs = [
-    { href: "/",   label: "ER + VW System" },
-    { href: "/s1", label: "S1 Liq Sweep" },
+    { href: "/",          label: "ER + VW System" },
+    { href: "/s1",        label: "S1 Liq Sweep" },
+    { href: "/combined",  label: "All Systems" },
   ];
 
   return (
