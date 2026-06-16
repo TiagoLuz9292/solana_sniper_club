@@ -10,6 +10,7 @@ import EquityChart from "@/components/EquityChart";
 import MonthlyReturns from "@/components/MonthlyReturns";
 import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
+import S1Monitor from "@/components/S1Monitor";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,9 @@ export default async function S1Dashboard() {
 
       {/* Open trades */}
       <LiveStatus activeApiPath="/api/s1/active" />
+
+      {/* Per-symbol S1 state monitor */}
+      <S1Monitor />
 
       {/* Equity curve + Events feed */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
