@@ -8,6 +8,7 @@ export default function TabNav() {
 
   const tabs = [
     { href: "/s1",        label: "S1 Liq Sweep" },
+    { href: "/sd",        label: "SD Breakout" },
     { href: "/combined",  label: "All Systems (archive)" },
     { href: "/",          label: "ER + VW (archive)" },
   ];
@@ -15,7 +16,7 @@ export default function TabNav() {
   return (
     <div className="flex gap-1 border-b border-slate-700 mb-6">
       {tabs.map((tab) => {
-        const active = path === tab.href || (tab.href === "/s1" && path === "/");
+        const active = path === tab.href || (tab.href === "/s1" && path === "/s1");
         return (
           <Link
             key={tab.href}
