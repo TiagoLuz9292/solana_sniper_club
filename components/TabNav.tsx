@@ -7,15 +7,15 @@ export default function TabNav() {
   const path = usePathname();
 
   const tabs = [
-    { href: "/",          label: "ER + VW System" },
     { href: "/s1",        label: "S1 Liq Sweep" },
-    { href: "/combined",  label: "All Systems" },
+    { href: "/combined",  label: "All Systems (archive)" },
+    { href: "/",          label: "ER + VW (archive)" },
   ];
 
   return (
     <div className="flex gap-1 border-b border-slate-700 mb-6">
       {tabs.map((tab) => {
-        const active = path === tab.href;
+        const active = path === tab.href || (tab.href === "/s1" && path === "/");
         return (
           <Link
             key={tab.href}

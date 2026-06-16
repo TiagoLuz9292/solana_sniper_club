@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { FaYoutube, FaXTwitter, FaTiktok } from "react-icons/fa6";
 import { fetchFileFromGitHub } from "@/lib/github";
 import Papa from "papaparse";
@@ -47,7 +48,8 @@ async function getData() {
 }
 
 export default async function Dashboard() {
-  const { trades, equity, currentEquity, openTrades } = await getData();
+  // S1-only era: root redirects to the S1 tab (ER+VW bot archived 2026-06-16)
+  redirect("/s1");
   const stats   = computeStats(trades, equity, currentEquity);
   const monthly = computeMonthlyReturns(equity);
 

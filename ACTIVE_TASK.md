@@ -1,84 +1,127 @@
-# Active Task — Combined ER+VW+S1 System
+# Active Task — S1-Only System (Clean Start)
 
-**Last updated:** 2026-06-15  
-**Status:** Dashboard combined tab built — bot switch pending
-
----
-
-## What was done this session
-
-### VPS data corrections (double-stack bug)
-Three S1 trades were opened at 2× intended position size due to a bot bug.
-Corrections applied to `trades.csv`, `equity_s1.csv`, `events.jsonl`, and `market_state_s1.json`
-on the VPS and pushed to `investment_demo_bot` branch:
-
-| Trade | Was | Corrected |
-|-------|-----|-----------|
-| XRPUSDT short (Jun 14 23:45) | pnl_usd=−10.20, eq=435.46 | pnl_usd=−5.10, eq=440.92 |
-| BTCUSDT short (Jun 15 11:00) | pnl_usd=−8.25, eq=421.99 | pnl_usd=−4.12, eq=436.79 |
-| ETHUSDT short (Jun 15 11:00) | pnl_usd=−10.58, eq=421.99 | pnl_usd=−5.29, eq=431.50 |
-
-market_state_s1.json equity manually set to 430.0 (Bybit balance after manual correction).
-
-### Dashboard: max drawdown fix
-`lib/calculations.ts` now computes max DD from the running equity series as a fallback
-when the bot writes dd_pct=0 (which S1 currently does).
-
-### Dashboard: Combined tab added (`/combined`)
-- Route: `/combined` — "All Systems" tab in TabNav
-- Loads ALL trades (ER + VW + S1) from trades.csv
-- Merges equity.csv (ER+VW, starts ~$300) + equity_s1.csv (S1) chronologically
-- ER+VW ended at ~$440.62, S1 started at ~$440.75 — same account, seamless stitch
-- Starting equity = $300
-- New API routes: `/api/combined/active` (merges both active states), `/api/combined/market-state` (uses S1 file)
-- Events feed uses existing `/api/events` (already all systems, no filter)
+**Last updated:** 2026-06-16  
+**Status:** S1 bot running with bugs fixed · data reset to $500 · dashboard pointing at S1 tab
 
 ---
 
-## Next step: Switch bot to combined ER+VW+S1 mode
+## Current State
 
-### What needs to happen on the VPS
+### What is running on VPS
+- **`bybit-s1.service`** → `/opt/trd/bybit_s1_runner/main.py` — **ACTIVE** (S1 Liq Sweep, 6 symbols)
+- **`bybit-combined.service`** → STOPPED (ER+VW+S1 combined) — archived 2026-06-16
+- **`solana-meme-bot.service`** → still running (separate, unrelated)
 
-1. **Stop current S1-only bot:**
-   ```bash
-   systemctl stop bybit-s1
-   ```
+### Why we reset
+Full audit (2026-06-16) found two bugs in the live S1 bot that caused it to underperform vs backtest:
 
-2. **Check if a combined bot service exists or needs to be created:**
-   - Current service: `bybit-s1.service`
-   - The combined bot needs to run ER + VW + S1 with max 1 trade per symbol
-   - Confirm the bot code supports combined mode (check `/opt/trd/bybit_trading_bot/`)
+#### Bug 1 — CRITICAL FIXED: 7 NameErrors in `_check_pending()`
+**File:** `bybit_s1_runner/systems/s1_liq_sweep.py`
 
-3. **If combined bot code exists:**
-   - Create/update a systemd service for it (e.g. `bybit-combined.service`)
-   - Start it: `systemctl start bybit-combined`
-   - Verify it writes to the existing files (trades.csv, equity_s1.csv, market_state_s1.json etc.)
-   - OR: if it writes to new files, update `/api/combined/active` and `/api/combined/market-state` routes to point to new file paths
+Bare identifiers used as variable names instead of string literals. Every 15m tick in PENDING state raised NameError → caught silently → symbol permanently stuck in PENDING until bot restart. Only `__init__` recovery on restart could transition PENDING→OPEN. Caused ~5 missed signals in the first 2 days (especially the profitable June 15 long entries that the backtest captured). Evidence: all trades with `atr_at_fill=0.0` in the pre-reset trades.csv were restart-recovered.
 
-4. **File path changes** (if combined bot uses different files):
-   - Update `app/combined/page.tsx` `getData()` to fetch correct file paths
-   - Update `app/api/combined/active/route.ts` and `market-state/route.ts`
+**Fixed:** All 7 string literals corrected in `systems/s1_liq_sweep.py`.
 
-### Dashboard update once combined bot is confirmed
-- Update the "All Systems" tab description from "ER + VW + S1 Combined" to match actual running config
-- Confirm equity curve shows correct continuous curve from $300 → current
+#### Bug 2 — FIXED: ATR formula mismatch
+**File:** `bybit_s1_runner/lib/indicators.py`
+
+Live used Wilder's ATR (alpha=1/14≈0.071). Backtest uses EWM(span=14, alpha=2/15≈0.133). Live ATR was ~6–7% larger → `body_min_atr=0.3×ATR` filter was stricter → some valid sweep signals rejected.
+
+**Fixed:** Changed to EWM(span=14). New formula matches backtest to 6 decimal places on all 6 symbols.
+
+#### Non-bug: losses ranging -0.97R to -1.46R
+Live `pnl_r` = NET (Bybit `closedPnl` includes fees). Backtest `pnl_r` = GROSS. Compare live to backtest `pnl_r_net`, not `pnl_r`. All correct. Fees run 0.1–0.5R per trade depending on risk% and leverage.
+
+### Corrected S1 results (pre-reset, excl. known-bad first ETH trade)
+24 trades from June 14–16 with bugs present:
+- Win rate: 33.3% (8/24)
+- EV/trade: -0.167R
+- Total R: -4.01R
+- Final equity (from $500): $479.21 (-4.2%)
+- Max DD: 7.3%
+
+The system underperformed because of the PENDING stuck bug causing missed trades. Backtest showed +0.06R EV for the same period (vs -0.167R live). After fixes, live should converge toward backtest long-run +0.196R EV.
+
+### Data archive
+Old ER+VW+S1 history archived on VPS at:
+`/opt/trd/bybit_trading_bot/results/live_investment/archive/`
+Also in git history: commit `fabd418d` on `investment_demo_bot` branch.
 
 ---
 
-## Architecture notes
+## Current data files (as of reset 2026-06-16 08:33 UTC)
 
-### Same Bybit demo account for all systems
-ER+VW and S1 run on the same account. equity.csv and equity_s1.csv are sequential,
-not parallel — no offsetting needed to stitch them.
+| File | Contents |
+|------|----------|
+| `trades.csv` | Header only — fresh start |
+| `equity.csv` | Header only (ER+VW stopped) |
+| `equity_s1.csv` | $500 starting row |
+| `events.jsonl` | Empty |
+| `portfolio.json` | `{"equity":500.0,"peak":500.0,"dd_tier":"FULL"}` |
+| `active_state.json` / `active_state_s1.json` | All null |
 
-### Max 1 trade per symbol constraint
-The combined bot must enforce this. S1 previously had a double-stack bug where two
-positions opened on the same symbol simultaneously. Ensure the combined bot checks
-for open positions before entering.
+**Note:** User will manually adjust Bybit demo account balance to $500. Bot read $500.75 on first tick (close enough — the equity_s1.csv starting row is $500 so the dashboard will show $500 as the anchor).
 
-### Bot VPS details
-- VPS: `167.233.21.208`, root user
-- Bot dir: `/opt/trd/bybit_trading_bot`
-- Branch: `investment_demo_bot`
-- SSH git key: `/root/.ssh/git_key`
-- Current running service: `bybit-s1.service`
+---
+
+## Dashboard changes made
+
+- `app/page.tsx` — `/` now redirects to `/s1` (S1 is the landing page)
+- `components/TabNav.tsx` — S1 tab is first; other tabs labeled "(archive)"
+
+Dashboard reads equity_s1.csv row 0 as `startingEquity` dynamically, so the $500 start is automatic.
+
+---
+
+## VPS bot management
+
+**ALWAYS use:**
+```bash
+systemctl restart bybit-s1
+systemctl status bybit-s1
+journalctl -u bybit-s1 -n 50
+```
+
+**NEVER:** `kill -9` + `nohup` (caused dual-instance bug previously)
+
+### Bot parameters (s1_a — unchanged)
+- swing_n=10, body_min_atr=0.3, sl_atr_mult=1.0, TP_R=2.0, MAX_FILL_BARS=4
+- RISK_PCT=1%, LEVERAGE=10×, CANDLE_LIMIT=100, ATR_PERIOD=14
+- Symbols: BTC, ETH, SOL, ADA, XRP, DOGE (all USDT linear perps)
+- Demo account: `api-demo.bybit.com`
+
+### If the bot crashes
+```bash
+journalctl -u bybit-s1 -n 100
+systemctl restart bybit-s1
+```
+
+---
+
+## Next tasks (for future sessions)
+
+1. **Monitor first 50+ trades** with fixed bot — compare EV to backtest +0.196R target
+2. **Twitter content:** Post the audit findings as a transparency thread:
+   - "We found 2 bugs that were hurting our results — here's what happened"
+   - Show live -0.167R vs backtest +0.196R gap
+   - Explain the NameError bug in plain language
+   - Explain the clean reset to $500
+   - Link to dashboard (S1 tab)
+3. **After ~100 live trades:** Formal live vs backtest EV comparison
+4. **Consider:** Add `atr_at_fill` logging to the restart-recovery path in `__init__` so we don't lose ATR info on restarts
+
+---
+
+## Files changed this session
+
+### VPS deployed
+- `/opt/trd/bybit_s1_runner/systems/s1_liq_sweep.py` — 7 NameErrors fixed in `_check_pending()`
+- `/opt/trd/bybit_s1_runner/lib/indicators.py` — ATR changed from Wilder's to EWM(span=14)
+
+### Dashboard (push to main → Vercel auto-deploy)
+- `app/page.tsx` — redirect to `/s1`
+- `components/TabNav.tsx` — S1 tab first, others labeled "(archive)"
+
+### GitHub bot repo (`investment_demo_bot` branch)
+- `results/live_investment/` — all data files reset
+- `results/live_investment/archive/` — historical data preserved
