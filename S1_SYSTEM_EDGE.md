@@ -101,7 +101,6 @@ Outcome recorded via Bybit closed PnL API.
 | `tp_r` | 2.0 | Fixed TP at 2R from entry |
 | `max_watch_bars` | 4 | Max bars to find confirmation after sweep |
 | `max_fill_bars` | 4 | Max bars to fill limit after confirmation |
-| `min_conf_gap_bars` | 1 | Min bars between sweep and confirmation — filters immediate next-bar noise |
 | `risk_pct` | 0.01 | 1% of balance per trade (live bot) |
 | `leverage` | 10× | Fixed leverage on Bybit demo |
 | `atr_period` | 14 | EWM ATR, same formula in backtest and live |
@@ -114,11 +113,11 @@ Outcome recorded via Bybit closed PnL API.
 
 | Symbol | Included | Reason |
 |--------|----------|--------|
-| ETHUSDT | ✅ | EV=+0.148R, PF=1.22, posYrs=6/6 |
-| SOLUSDT | ✅ | EV=+0.304R, PF=1.52, posYrs=6/6 — strongest |
-| ADAUSDT | ✅ | EV=+0.213R, PF=1.34, posYrs=6/6 |
-| XRPUSDT | ✅ | EV=+0.191R, PF=1.30, posYrs=6/6 |
-| DOGEUSDT | ✅ | EV=+0.205R, PF=1.33, posYrs=6/6 |
+| ETHUSDT | ✅ | EV=+0.130R, PF=1.20, posYrs=6/6 |
+| SOLUSDT | ✅ | EV=+0.251R, PF=1.41, posYrs=5/6 — strongest |
+| ADAUSDT | ✅ | EV=+0.222R, PF=1.36, posYrs=6/6 |
+| XRPUSDT | ✅ | EV=+0.214R, PF=1.34, posYrs=6/6 |
+| DOGEUSDT | ✅ | EV=+0.169R, PF=1.26, posYrs=6/6 |
 | BTCUSDT | ❌ | EV=+0.089R only — dilutes portfolio; dropped Jun 16 2026 |
 
 **BTC was removed on June 16, 2026.** Its EV (+0.089R) is less than half the average of the other symbols (+0.197R combined). It adds MaxDD without proportional edge.
@@ -131,54 +130,52 @@ Outcome recorded via Bybit closed PnL API.
 
 | Symbol | n | WR | EV/trade | PF | Total R | MaxDD | posYrs |
 |--------|---|-----|----------|-----|---------|-------|--------|
-| ETH | 1,285 | 45.0% | +0.148R | 1.22 | +189.6R | 33.2R | 6/6 |
-| SOL | 1,227 | 47.9% | +0.304R | 1.52 | +373.2R | 17.1R | 6/6 |
-| ADA | 1,326 | 45.4% | +0.213R | 1.34 | +281.8R | 16.9R | 6/6 |
-| XRP | 1,209 | 45.7% | +0.191R | 1.30 | +231.1R | 26.8R | 6/6 |
-| DOGE | 1,247 | 45.3% | +0.205R | 1.33 | +256.2R | 32.1R | 6/6 |
-| **TOTAL** | **6,294** | **45.8%** | **+0.212R** | **~1.34** | **+1,331.9R** | — | **6/6** |
+| ETH | 1,682 | 44.3% | +0.130R | 1.20 | +218.8R | 36.2R | 6/6 |
+| SOL | 1,639 | 46.2% | +0.251R | 1.41 | +411.9R | 19.3R | 5/6 |
+| ADA | 1,743 | 45.8% | +0.222R | 1.36 | +386.2R | 22.6R | 6/6 |
+| XRP | 1,654 | 46.4% | +0.214R | 1.34 | +354.3R | 25.1R | 6/6 |
+| DOGE | 1,691 | 44.1% | +0.169R | 1.26 | +285.3R | 23.9R | 6/6 |
+| **TOTAL** | **8,409** | **45.4%** | **+0.197R** | **~1.31** | **+1,656R** | — | **6/6** |
 
 ### Yearly Total R (all 5 symbols combined)
 
 | Year | Total R | Profitable? |
 |------|---------|-------------|
-| 2021 | +137.7R | ✅ |
-| 2022 | +252.8R | ✅ |
-| 2023 | +114.5R | ✅ |
-| 2024 | +326.5R | ✅ |
-| 2025 | +367.6R | ✅ |
-| 2026 (Jan–Jun) | +132.7R | ✅ |
+| 2021 | +157.9R | ✅ |
+| 2022 | +298.6R | ✅ |
+| 2023 | +165.2R | ✅ |
+| 2024 | +384.5R | ✅ |
+| 2025 | +444.0R | ✅ |
+| 2026 (Jan–Jun) | +206.3R | ✅ |
 
 **Every single year profitable.** No losing year across 5.5 years of data.
 
-### Entry Funnel (gap=1 params, 5 symbols)
-
-With `min_conf_gap_bars=1`, the immediate next-bar confirmation is skipped. This removes the weakest confirmations (same-bar noise) and is reflected in the higher EV.
+### Entry Funnel (unconstrained, r1_a params)
 
 | Stage | Count | % of prior |
 |-------|-------|-----------|
 | Sweeps detected | 67,041 | — |
-| Confirmation accepted (gap ≥ 1 bar) | ~18,000 | ~27% of sweeps |
-| Filled (third touch) | 6,294 | ~35% of confirmations |
+| Got confirmation bar | 24,449 | 36.5% of sweeps |
+| Filled (third touch) | 11,148 | 37.3% of confirmations |
+| Expired (price ran away) | 8,613 | 28.8% |
+| Invalidated (level broke) | 10,096 | 33.8% |
 
-35% of accepted confirmations fill. 65% expire or are invalidated — expected and built into the EV.
+37% of confirmation bars see a third touch and fill. 62% of the time price runs away after the confirmation — this is expected and built into the EV.
 
 ### Equity Simulation ($1,000 start, 0.5% risk/trade, simultaneous across all 5 symbols)
 
-| Year | Equity | Return | Trades |
-|------|--------|--------|--------|
-| Start 2021 | $1,000 | — | — |
-| End 2021 | $1,959 | +95.9% | 509 |
-| End 2022 | $6,693 | +241.6% | 1,128 |
-| End 2023 | $11,429 | +70.8% | 1,246 |
-| End 2024 | $55,956 | +389.6% | 1,348 |
-| End 2025 | $335,114 | +498.9% | 1,431 |
-| Jun 2026 | $635,853 | +89.7% | 632 |
+| Year | Equity | Return |
+|------|--------|--------|
+| Start 2021 | $1,000 | — |
+| End 2021 | $2,155 | +115.5% |
+| End 2022 | $9,092 | +322.0% |
+| End 2023 | $19,722 | +116.9% |
+| End 2024 | $127,225 | +545.1% |
+| End 2025 | $1,095,593 | +761.1% |
+| Jun 2026 | $2,977,713 | +171.8% |
 
-**Worst drawdown: −20.3%** (with 0.5% risk/trade, no daily DD limit)  
-**~3.3 trades/day total** across 5 symbols (~0.65 trades/day per symbol)  
-
-Note: the equity sim terminal value is lower than the gap=0 version because gap=1 takes 25% fewer trades. However EV per trade is higher (+0.212R vs +0.197R), and all years remain profitable.
+**Worst drawdown: −18.1%** (with 0.5% risk/trade, no daily DD limit)  
+**~4.4 trades/day total** across 5 symbols (~0.88 trades/day per symbol)
 
 ---
 
@@ -216,9 +213,6 @@ These are non-negotiable. Any deviation breaks the live/backtest equivalence.
 6. **Sweep detection uses rolling N-bar min/max of PRIOR bars** (not including the sweep bar itself):  
    `swing_low = min(low for last SWING_N bars before sweep bar)`
 
-7. **Confirmation bar cannot be the immediate next bar after the sweep (`min_conf_gap_bars=1`).**  
-   The bar directly after the sweep is skipped as a potential confirmation — it's treated as gap/breathing-room time. Confirmation is only accepted from bar 2 onwards. Invalidation (close through level) is still checked on gap bars. Grid search confirmed: gap=1 raises EV from +0.197R to +0.212R at a cost of 25% fewer trades.
-
 7. **Bot restart recovery:** Cancel any orphaned pending limit orders on restart (implemented since June 16 fix). Recover open positions normally.
 
 ---
@@ -232,16 +226,8 @@ These are non-negotiable. Any deviation breaks the live/backtest equivalence.
 
 Safe to adjust without re-backtest:
 - `risk_pct` — only affects position sizing, not trade selection
-- `leverage` — only affects notional, not trade selection
+- `leverage` — only affects notional, not trade selection  
 - Log message text
-
-### Gap Filter — Research Log (June 16, 2026)
-
-A 15-variant grid search tested `min_sweep_wick_atr` ∈ {0, 0.1, 0.2, 0.3, 0.5} × `min_conf_gap_bars` ∈ {0, 1, 2}. Key findings:
-
-- **Wick filter hurts EV**: requiring a larger wick on the sweep bar degrades performance at every threshold. The body filter (0.3×ATR) is sufficient quality control.
-- **Gap=1 is the only improvement**: +0.015R EV gain (−25% trades). Gap=2 adds only +0.002R for another −16% trades.
-- **`min_conf_gap_bars=1` adopted** as the new validated parameter. All numbers in this document reflect gap=1.
 
 ---
 
