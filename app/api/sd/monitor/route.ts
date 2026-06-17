@@ -28,8 +28,21 @@ export async function GET() {
       };
 
       const dir = s.direction === "bull" ? "long" : s.direction === "bear" ? "short" : s.direction;
+      const at = (as_[sym] as { active_trade?: Record<string, unknown> })?.active_trade;
 
-      if (s.status === "IDLE") {
+      // active_state_sd.json is written on every open/close (more timely than market_state_sd.json
+      // which only updates every 15-min tick). Override stale WATCHING/PENDING when a trade is live.
+      if (at) {
+        const atDir = (at.direction as string) === "bull" ? "long" : (at.direction as string) === "bear" ? "short" : (at.direction as string);
+        result[sym] = {
+          state: "OPEN",
+          direction: atDir ?? dir,
+          fill_price: at.fill_price ?? 0,
+          sl: at.stop_loss ?? 0,
+          tp: at.take_profit ?? 0,
+          atr: s.atr,
+        };
+      } else if (s.status === "IDLE") {
         result[sym] = { state: "IDLE", atr: s.atr };
       } else if (s.status === "WATCHING") {
         result[sym] = {
@@ -50,7 +63,6 @@ export async function GET() {
           atr: s.atr,
         };
       } else if (s.status === "OPEN") {
-        const at = (as_[sym] as { active_trade?: Record<string, unknown> })?.active_trade;
         result[sym] = {
           state: "OPEN",
           direction: dir,
