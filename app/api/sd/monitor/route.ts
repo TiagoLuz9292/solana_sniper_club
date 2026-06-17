@@ -63,14 +63,8 @@ export async function GET() {
           atr: s.atr,
         };
       } else if (s.status === "OPEN") {
-        result[sym] = {
-          state: "OPEN",
-          direction: dir,
-          fill_price: at?.fill_price ?? 0,
-          sl: at?.stop_loss ?? 0,
-          tp: at?.take_profit ?? 0,
-          atr: s.atr,
-        };
+        // active_state said no trade, but market_state says OPEN — show state without trade details
+        result[sym] = { state: "OPEN", direction: dir, fill_price: 0, sl: 0, tp: 0, atr: s.atr };
       }
     }
 
