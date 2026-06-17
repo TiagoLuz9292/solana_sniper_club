@@ -57,9 +57,7 @@ async function getData() {
   const currentEquity: number =
     rawEquity != null && isFinite(rawEquity) ? rawEquity : 0;
 
-  const rawStart = equity.length > 0 ? equity[0].equity : null;
-  const startingEquity: number =
-    rawStart != null && isFinite(rawStart) && rawStart > 0 ? rawStart : currentEquity || 300;
+  const startingEquity = 500.51;
 
   const openTrades = Object.values(activeState).filter(
     (v) => !!(v as { active_trade?: unknown }).active_trade
