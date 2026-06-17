@@ -27,15 +27,13 @@ export function computeStats(
   const grossWin  = wins.reduce((s, t)   => s + (t.pnl_usd ?? 0), 0);
   const grossLoss = losses.reduce((s, t) => s + Math.abs(t.pnl_usd ?? 0), 0);
 
-  // dd_pct in bot files may be 0 (S1 bot doesn't compute it); derive from equity series as fallback
-  const maxDDFromTrades = closed.reduce((m, t) => Math.max(m, t.dd_pct ?? 0), 0);
-  const maxDDFromEquity = equity.reduce((m, e)  => Math.max(m, e.dd_pct ?? 0), 0);
+  // Compute max drawdown purely from realized equity curve, anchored to startingEquity.
+  // The bot's dd_pct field reflects unrealized PnL during open trades and is unreliable.
   let seriesPeak = startingEquity;
-  const maxDDFromSeries = equity.reduce((m, e) => {
+  const maxDD = equity.reduce((m, e) => {
     if (e.equity > seriesPeak) seriesPeak = e.equity;
     return seriesPeak > 0 ? Math.max(m, (seriesPeak - e.equity) / seriesPeak * 100) : m;
   }, 0);
-  const maxDD = Math.max(maxDDFromTrades, maxDDFromEquity, maxDDFromSeries);
 
   return {
     currentEquity,
