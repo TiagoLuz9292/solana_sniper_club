@@ -9,6 +9,7 @@ export default function TabNav() {
   const tabs = [
     { href: "/s1",        label: "S1 Liq Sweep" },
     { href: "/sd",        label: "SD Breakout" },
+    { href: "/sha",       label: "SHA HA Rev" },
     { href: "/combined",  label: "All Systems (archive)" },
     { href: "/",          label: "ER + VW (archive)" },
   ];
