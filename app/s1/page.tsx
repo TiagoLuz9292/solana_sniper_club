@@ -121,7 +121,7 @@ export default async function S1Dashboard() {
       </div>
 
       {/* Trade history */}
-      <TradeHistory trades={trades} />
+      <TradeHistory trades={trades} apiPath="/api/s1/trades" />
 
       {/* Footer */}
       <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">

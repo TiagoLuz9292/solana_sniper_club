@@ -8,6 +8,8 @@ type Filter = { system: string; symbol: string; direction: string; outcome: stri
 
 const INITIAL: Filter = { system: "All", symbol: "All", direction: "All", outcome: "All" };
 
+const POLL_MS = 60_000;
+
 const COL_HEADERS: { label: string; className: string }[] = [
   { label: "",        className: "w-5 pb-2 pr-2" },
   { label: "Date",    className: "text-left pb-2 pr-4" },
@@ -33,7 +35,8 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
   );
 }
 
-export default function TradeHistory({ trades }: { trades: Trade[] }) {
+export default function TradeHistory({ trades: initialTrades, apiPath }: { trades: Trade[]; apiPath?: string }) {
+  const [trades, setTrades] = useState<Trade[]>(initialTrades);
   const [filters, setFilters] = useState<Filter>(INITIAL);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [showSticky, setShowSticky] = useState(false);
@@ -67,6 +70,19 @@ export default function TradeHistory({ trades }: { trades: Trade[] }) {
       window.removeEventListener("resize", onScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (!apiPath) return;
+    const fetchTrades = async () => {
+      try {
+        const res = await fetch(apiPath, { cache: "no-store" });
+        if (res.ok) setTrades(await res.json());
+      } catch { /* keep stale */ }
+    };
+    fetchTrades();
+    const id = setInterval(fetchTrades, POLL_MS);
+    return () => clearInterval(id);
+  }, [apiPath]);
 
   const set = (key: keyof Filter) => (v: string) => setFilters(f => ({ ...f, [key]: v }));
 

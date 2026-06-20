@@ -108,7 +108,7 @@ export default async function ERDashboard() {
         <MonthlyReturns data={monthly} />
       </div>
 
-      <TradeHistory trades={trades} />
+      <TradeHistory trades={trades} apiPath="/api/er/trades" />
 
       <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
         Bybit demo account · EMA Ribbon Pullback system · Not financial advice

@@ -108,7 +108,7 @@ export default async function VWDashboard() {
         <MonthlyReturns data={monthly} />
       </div>
 
-      <TradeHistory trades={trades} />
+      <TradeHistory trades={trades} apiPath="/api/vw/trades" />
 
       <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
         Bybit demo account · VWAP Reversion system · Not financial advice

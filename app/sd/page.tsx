@@ -124,7 +124,7 @@ export default async function SDDashboard() {
       </div>
 
       {/* Trade history */}
-      <TradeHistory trades={trades} />
+      <TradeHistory trades={trades} apiPath="/api/sd/trades" />
 
       {/* Footer */}
       <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
