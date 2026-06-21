@@ -80,7 +80,7 @@ export default async function VWDashboard() {
           </div>
         </div>
         <p className="text-slate-400 text-sm">
-          VW System — daily VWAP wick reversal + pullback to VWAP · sl=1.0×ATR · tp=1.5R · 0.28% risk
+          VW System — daily VWAP wick reversal + pullback to VWAP · sl=1.0×ATR · tp=1.5R · 0.813% risk
         </p>
       </div>
 

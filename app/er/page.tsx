@@ -80,7 +80,7 @@ export default async function ERDashboard() {
           </div>
         </div>
         <p className="text-slate-400 text-sm">
-          ER System — EMA8/13/21/34/55 stack + pullback to EMA21 · sl=0.5×ATR · tp=2R · 0.24% risk
+          ER System — EMA8/13/21/34/55 stack + pullback to EMA21 · sl=0.5×ATR · tp=2R · 0.617% risk
         </p>
       </div>
 

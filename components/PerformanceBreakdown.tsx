@@ -58,11 +58,15 @@ export default function PerformanceBreakdown({ trades }: { trades: Trade[] }) {
   return (
     <div className="bg-surface-card border border-surface-border rounded-xl p-6">
       <h2 className="text-lg font-semibold text-white mb-5">Performance Breakdown</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
-        <BreakdownTable title="Symbol"    rows={bySymbol}    padding="md:pr-6 pb-6 md:pb-0" />
-        <BreakdownTable title="System"    rows={bySystem}    padding="md:px-6 py-6 md:py-0" />
-        <BreakdownTable title="Direction" rows={byDirection} padding="md:pl-6 pt-6 md:pt-0" />
-      </div>
+      {trades.length === 0 ? (
+        <p className="text-slate-500 text-sm">No trades recorded yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
+          <BreakdownTable title="Symbol"    rows={bySymbol}    padding="md:pr-6 pb-6 md:pb-0" />
+          <BreakdownTable title="System"    rows={bySystem}    padding="md:px-6 py-6 md:py-0" />
+          <BreakdownTable title="Direction" rows={byDirection} padding="md:pl-6 pt-6 md:pt-0" />
+        </div>
+      )}
     </div>
   );
 }
