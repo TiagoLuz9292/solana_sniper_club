@@ -5,7 +5,7 @@ import type { Trade } from "@/types";
 import { fmtPrice } from "@/lib/format";
 
 type Filter = { system: string; symbol: string; direction: string; outcome: string };
-type TradeSortKey = "symbol" | "direction" | "pnl_r" | "pnl_usd" | "outcome";
+type TradeSortKey = "close_ts" | "system" | "symbol" | "direction" | "pnl_r" | "pnl_usd" | "outcome";
 type SortDir = "asc" | "desc";
 
 const INITIAL: Filter = { system: "All", symbol: "All", direction: "All", outcome: "All" };
@@ -14,8 +14,8 @@ const POLL_MS = 60_000;
 
 const COL_HEADERS: { label: string; className: string; sortKey?: TradeSortKey }[] = [
   { label: "",        className: "w-5 pb-2 pr-2" },
-  { label: "Date",    className: "text-left pb-2 pr-4" },
-  { label: "System",  className: "text-left pb-2 pr-4" },
+  { label: "Date",    className: "text-left pb-2 pr-4",  sortKey: "close_ts" },
+  { label: "System",  className: "text-left pb-2 pr-4",  sortKey: "system" },
   { label: "Symbol",  className: "text-left pb-2 pr-4",  sortKey: "symbol" },
   { label: "Dir",     className: "text-left pb-2 pr-4",  sortKey: "direction" },
   { label: "Entry",   className: "text-right pb-2 pr-4" },
@@ -112,7 +112,9 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
   const sorted = sortKey
     ? [...filtered].sort((a, b) => {
         let aVal: string | number, bVal: string | number;
-        if (sortKey === "symbol")    { aVal = a.symbol ?? "";    bVal = b.symbol ?? ""; }
+        if (sortKey === "close_ts")       { aVal = a.close_ts ?? "";  bVal = b.close_ts ?? ""; }
+        else if (sortKey === "system")    { aVal = a.system ?? "";    bVal = b.system ?? ""; }
+        else if (sortKey === "symbol")    { aVal = a.symbol ?? "";    bVal = b.symbol ?? ""; }
         else if (sortKey === "direction") { aVal = a.direction ?? ""; bVal = b.direction ?? ""; }
         else if (sortKey === "pnl_r")    { aVal = a.pnl_r ?? 0;     bVal = b.pnl_r ?? 0; }
         else if (sortKey === "pnl_usd")  { aVal = a.pnl_usd ?? 0;   bVal = b.pnl_usd ?? 0; }
