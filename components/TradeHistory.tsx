@@ -5,22 +5,24 @@ import type { Trade } from "@/types";
 import { fmtPrice } from "@/lib/format";
 
 type Filter = { system: string; symbol: string; direction: string; outcome: string };
+type TradeSortKey = "symbol" | "direction" | "pnl_r" | "pnl_usd" | "outcome";
+type SortDir = "asc" | "desc";
 
 const INITIAL: Filter = { system: "All", symbol: "All", direction: "All", outcome: "All" };
 
 const POLL_MS = 60_000;
 
-const COL_HEADERS: { label: string; className: string }[] = [
+const COL_HEADERS: { label: string; className: string; sortKey?: TradeSortKey }[] = [
   { label: "",        className: "w-5 pb-2 pr-2" },
   { label: "Date",    className: "text-left pb-2 pr-4" },
   { label: "System",  className: "text-left pb-2 pr-4" },
-  { label: "Symbol",  className: "text-left pb-2 pr-4" },
-  { label: "Dir",     className: "text-left pb-2 pr-4" },
+  { label: "Symbol",  className: "text-left pb-2 pr-4",  sortKey: "symbol" },
+  { label: "Dir",     className: "text-left pb-2 pr-4",  sortKey: "direction" },
   { label: "Entry",   className: "text-right pb-2 pr-4" },
   { label: "Exit",    className: "text-right pb-2 pr-4" },
-  { label: "PnL (R)", className: "text-right pb-2 pr-4" },
-  { label: "PnL ($)", className: "text-right pb-2 pr-4" },
-  { label: "Result",  className: "text-right pb-2" },
+  { label: "PnL (R)", className: "text-right pb-2 pr-4", sortKey: "pnl_r" },
+  { label: "PnL ($)", className: "text-right pb-2 pr-4", sortKey: "pnl_usd" },
+  { label: "Result",  className: "text-right pb-2",       sortKey: "outcome" },
 ];
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
@@ -43,6 +45,8 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [stickyLeft, setStickyLeft] = useState(0);
   const [stickyWidth, setStickyWidth] = useState(0);
+  const [sortKey, setSortKey] = useState<TradeSortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const cardRef     = useRef<HTMLDivElement>(null);
   const theadRowRef = useRef<HTMLTableRowElement>(null);
@@ -86,6 +90,15 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
 
   const set = (key: keyof Filter) => (v: string) => setFilters(f => ({ ...f, [key]: v }));
 
+  const handleSort = (key: TradeSortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
   const symbols = ["All", ...Array.from(new Set(trades.map(t => t.symbol.replace("USDT", ""))))];
 
   const filtered = trades.filter(t => {
@@ -95,6 +108,20 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
     if (filters.outcome   !== "All" && t.outcome   !== filters.outcome.toLowerCase())  return false;
     return true;
   });
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        let aVal: string | number, bVal: string | number;
+        if (sortKey === "symbol")    { aVal = a.symbol ?? "";    bVal = b.symbol ?? ""; }
+        else if (sortKey === "direction") { aVal = a.direction ?? ""; bVal = b.direction ?? ""; }
+        else if (sortKey === "pnl_r")    { aVal = a.pnl_r ?? 0;     bVal = b.pnl_r ?? 0; }
+        else if (sortKey === "pnl_usd")  { aVal = a.pnl_usd ?? 0;   bVal = b.pnl_usd ?? 0; }
+        else                             { aVal = a.outcome ?? "";   bVal = b.outcome ?? ""; }
+        if (typeof aVal === "string" && typeof bVal === "string")
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        return sortDir === "asc" ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+      })
+    : filtered;
 
   const toggle = (i: number) =>
     setExpanded(s => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; });
@@ -114,9 +141,23 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
             </colgroup>
             <thead>
               <tr className="text-slate-400 text-xs uppercase">
-                {COL_HEADERS.map((col, i) => (
-                  <th key={i} className={col.className}>{col.label}</th>
-                ))}
+                {COL_HEADERS.map((col, i) => {
+                  const active = sortKey === col.sortKey;
+                  return (
+                    <th
+                      key={i}
+                      className={`${col.className}${col.sortKey ? " cursor-pointer select-none hover:text-slate-200 transition-colors" : ""}${active ? " text-slate-200" : ""}`}
+                      onClick={col.sortKey ? () => handleSort(col.sortKey!) : undefined}
+                    >
+                      {col.label}
+                      {col.sortKey && (
+                        <span className={`ml-0.5 ${active ? "text-slate-300" : "text-slate-600"}`}>
+                          {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+                        </span>
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
           </table>
@@ -164,13 +205,27 @@ export default function TradeHistory({ trades: initialTrades, apiPath }: { trade
         <table className="w-full text-sm">
           <thead>
             <tr ref={theadRowRef} className="text-slate-400 text-xs uppercase border-b border-surface-border">
-              {COL_HEADERS.map((col, i) => (
-                <th key={i} className={col.className}>{col.label}</th>
-              ))}
+              {COL_HEADERS.map((col, i) => {
+                const active = sortKey === col.sortKey;
+                return (
+                  <th
+                    key={i}
+                    className={`${col.className}${col.sortKey ? " cursor-pointer select-none hover:text-slate-200 transition-colors" : ""}${active ? " text-slate-200" : ""}`}
+                    onClick={col.sortKey ? () => handleSort(col.sortKey!) : undefined}
+                  >
+                    {col.label}
+                    {col.sortKey && (
+                      <span className={`ml-0.5 ${active ? "text-slate-300" : "text-slate-600"}`}>
+                        {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+                      </span>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {filtered.map((t, i) => {
+            {sorted.map((t, i) => {
               const isWin = t.outcome === "win";
               const isOpen = expanded.has(i);
               return (

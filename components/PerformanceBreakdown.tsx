@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import type { Trade } from "@/types";
+
+type SortKey = "total" | "wr" | "avgR";
+type SortDir = "asc" | "desc";
 
 function breakdownBy<K extends keyof Trade>(trades: Trade[], key: K) {
   const groups: Record<string, { wins: number; total: number; pnl_r: number }> = {};
@@ -11,10 +15,60 @@ function breakdownBy<K extends keyof Trade>(trades: Trade[], key: K) {
     groups[k].pnl_r += t.pnl_r;
     if (t.outcome === "win") groups[k].wins++;
   }
-  return Object.entries(groups).sort((a, b) => b[1].total - a[1].total);
+  return Object.entries(groups);
 }
 
-function BreakdownTable({ title, rows, padding }: { title: string; rows: [string, { wins: number; total: number; pnl_r: number }][]; padding: string }) {
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+  return (
+    <span className={`ml-0.5 ${active ? "text-slate-300" : "text-slate-600"}`}>
+      {active ? (dir === "asc" ? "↑" : "↓") : "↕"}
+    </span>
+  );
+}
+
+function BreakdownTable({
+  title,
+  rows,
+  padding,
+}: {
+  title: string;
+  rows: [string, { wins: number; total: number; pnl_r: number }][];
+  padding: string;
+}) {
+  const [sortKey, setSortKey] = useState<SortKey>("total");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const sorted = [...rows].sort((a, b) => {
+    const [, as_] = a;
+    const [, bs_] = b;
+    let aVal: number, bVal: number;
+    if (sortKey === "total") {
+      aVal = as_.total;
+      bVal = bs_.total;
+    } else if (sortKey === "wr") {
+      aVal = as_.total > 0 ? as_.wins / as_.total : 0;
+      bVal = bs_.total > 0 ? bs_.wins / bs_.total : 0;
+    } else {
+      aVal = as_.total > 0 ? as_.pnl_r / as_.total : 0;
+      bVal = bs_.total > 0 ? bs_.pnl_r / bs_.total : 0;
+    }
+    return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+  });
+
+  const thCls = (key: SortKey) =>
+    `text-right pb-1 cursor-pointer select-none hover:text-slate-300 transition-colors ${
+      sortKey === key ? "text-slate-300" : "text-slate-500"
+    }`;
+
   return (
     <div className={padding}>
       <h3 className="text-sm font-semibold text-slate-300 mb-3">{title}</h3>
@@ -22,13 +76,19 @@ function BreakdownTable({ title, rows, padding }: { title: string; rows: [string
         <thead>
           <tr className="text-slate-500 text-xs uppercase border-b border-surface-border">
             <th className="text-left pb-1">{title}</th>
-            <th className="text-right pb-1">Trades</th>
-            <th className="text-right pb-1">Win %</th>
-            <th className="text-right pb-1">Avg R</th>
+            <th className={thCls("total")} onClick={() => handleSort("total")}>
+              Trades <SortIcon active={sortKey === "total"} dir={sortDir} />
+            </th>
+            <th className={thCls("wr")} onClick={() => handleSort("wr")}>
+              Win % <SortIcon active={sortKey === "wr"} dir={sortDir} />
+            </th>
+            <th className={thCls("avgR")} onClick={() => handleSort("avgR")}>
+              Avg R <SortIcon active={sortKey === "avgR"} dir={sortDir} />
+            </th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(([label, { wins, total, pnl_r }]) => {
+          {sorted.map(([label, { wins, total, pnl_r }]) => {
             const wr   = total > 0 ? (wins / total) * 100 : 0;
             const avgR = total > 0 ? pnl_r / total : 0;
             return (
