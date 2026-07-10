@@ -10,6 +10,7 @@ import EquityChart from "@/components/EquityChart";
 import MonthlyReturns from "@/components/MonthlyReturns";
 import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
+import EMAMonitor from "@/components/EMAMonitor";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,8 @@ export default async function EMA55Dashboard() {
       />
 
       <LiveStatus activeApiPath="/api/ema55/active" />
+
+      <EMAMonitor apiPath="/api/ema55/monitor" emaPeriod={55} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <EquityChart data={equity} trades={trades} currentEquity={currentEquity} startingEquity={startingEquity} />
