@@ -7,11 +7,11 @@ export default function TabNav() {
   const path = usePathname();
 
   const tabs = [
-    { href: "/s1",  label: "S1 Liq Sweep" },
-    { href: "/sd",  label: "SD Breakout" },
-    { href: "/sha", label: "SHA HA Rev" },
-    { href: "/er",  label: "ER Ribbon" },
-    { href: "/vw",  label: "VW Reversion" },
+    { href: "/s1",    label: "S1 Liq Sweep" },
+    { href: "/sd",    label: "SD Breakout" },
+    { href: "/ema55", label: "EMA55 Reclaim" },
+    { href: "/ema21", label: "EMA21 Reclaim" },
+    { href: "/ema8",  label: "EMA8 Reclaim" },
   ];
 
   return (
