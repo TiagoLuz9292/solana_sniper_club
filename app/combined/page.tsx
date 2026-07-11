@@ -12,7 +12,7 @@ import MonthlyReturns from "@/components/MonthlyReturns";
 import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 const COMBINED_START_EQUITY = 300;
 

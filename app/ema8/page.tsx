@@ -12,7 +12,7 @@ import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
 import EMAMonitor from "@/components/EMAMonitor";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 async function getData() {
   const [tradesRaw, equityRaw, activeRaw, marketRaw] = await Promise.all([
@@ -79,10 +79,6 @@ export default async function EMA8Dashboard() {
             </span>
           </div>
         </div>
-        <p className="text-slate-400 text-sm">
-          Price was above/below EMA8, violates it, shows resistance and reclaims (closes back on
-          trend side), then a limit order retests EMA8 for entry · sl=0.5×ATR · tp=2R
-        </p>
         <p className="text-xs text-slate-500">
           Risk sizing: <span className="text-slate-300 font-medium">0.167% of equity per trade</span> —
           the smaller of (a) target max 15% historical drawdown at backtest DD=90.0R, and

@@ -12,7 +12,7 @@ import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
 import S1Monitor from "@/components/S1Monitor";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 async function getData() {
   const [tradesRaw, equityRaw, activeRaw, marketRaw] = await Promise.all([

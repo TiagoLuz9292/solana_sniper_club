@@ -15,7 +15,7 @@ export async function fetchOkxFile(path: string): Promise<string> {
       Accept: "application/vnd.github.raw+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    next: { revalidate: 15 },
   });
 
   if (!res.ok) {
