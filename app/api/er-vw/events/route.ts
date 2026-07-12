@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const raw = await fetchOkxFile("results/live_investment_ema21/events.jsonl");
+    const raw = await fetchOkxFile("results/live_investment_er_vw/events.jsonl");
     const events = raw
       .trim()
       .split("\n")

@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const raw = await fetchOkxFile("results/live_investment_ema8/symbol_states_ema8.json");
+    const raw = await fetchOkxFile("results/live_investment_er_vw/market_state_er_vw.json");
     return NextResponse.json(JSON.parse(raw), {
       headers: { "Cache-Control": "no-store" },
     });

@@ -10,16 +10,16 @@ import EquityChart from "@/components/EquityChart";
 import MonthlyReturns from "@/components/MonthlyReturns";
 import TradeHistory from "@/components/TradeHistory";
 import PerformanceBreakdown from "@/components/PerformanceBreakdown";
-import EMAMonitor from "@/components/EMAMonitor";
+import ERVWMonitor from "@/components/ERVWMonitor";
 
 export const revalidate = 15;
 
 async function getData() {
   const [tradesRaw, equityRaw, activeRaw, marketRaw] = await Promise.all([
-    fetchOkxFile("results/live_investment_ema21/trades.csv").catch(() => ""),
-    fetchOkxFile("results/live_investment_ema21/equity_ema21.csv").catch(() => ""),
-    fetchOkxFile("results/live_investment_ema21/active_state_ema21.json").catch(() => "{}"),
-    fetchOkxFile("results/live_investment_ema21/market_state_ema21.json").catch(() => "{}"),
+    fetchOkxFile("results/live_investment_er_vw/trades.csv").catch(() => ""),
+    fetchOkxFile("results/live_investment_er_vw/equity_er_vw.csv").catch(() => ""),
+    fetchOkxFile("results/live_investment_er_vw/active_state_er_vw.json").catch(() => "{}"),
+    fetchOkxFile("results/live_investment_er_vw/market_state_er_vw.json").catch(() => "{}"),
   ]);
 
   const trades: Trade[] = tradesRaw
@@ -58,7 +58,7 @@ async function getData() {
   return { trades, equity, currentEquity, startingEquity, openTrades };
 }
 
-export default async function EMA21Dashboard() {
+export default async function ERVWDashboard() {
   const { trades, equity, currentEquity, startingEquity, openTrades } = await getData();
   const stats   = computeStats(trades, equity, currentEquity, startingEquity);
   const monthly = computeMonthlyReturns(equity);
@@ -68,7 +68,7 @@ export default async function EMA21Dashboard() {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">EMA Reclaim + Retest — EMA21</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">ER + VW — EMA Ribbon + VWAP, HTF-aligned</h1>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-full bg-yellow-900/60 border border-yellow-700 text-yellow-300 text-xs font-semibold tracking-wide">
               BYBIT DEMO
@@ -80,10 +80,13 @@ export default async function EMA21Dashboard() {
           </div>
         </div>
         <p className="text-xs text-slate-500">
-          Risk sizing: <span className="text-slate-300 font-medium">0.097% of equity per trade</span> —
-          the smaller of (a) target max 15% historical drawdown at backtest DD=154.2R, and
-          (b) capping a worst-case day (all ~9.4 trades/day losing) at 3% of equity. Backtest:
-          n=17,599 · EV=+0.360R · WR=58.1% · PF=1.62 · 6/6 years positive (2021–2026, all 6 symbols).
+          Two systems sharing one account: ER (5-EMA ribbon pullback, ETH/SOL/ADA/DOGE, 3-4R TP)
+          and VW (VWAP wick-touch, all 6 symbols, 1.5-2.5R TP), both gated on 3-timeframe (1h/2h/4h)
+          HTF alignment. Only one of ER/VW may hold a position on a given symbol at a time.
+          Risk: per-symbol 0.88-1.20% of equity, throttled to 5/8 or 3/8 at 85%/75% of peak equity
+          (full restore at 95% of peak). Re-validated 2026-07-12: full 2021-2026 backtest, 10 random
+          2-3mo periods, a 20-quarter block-bootstrap simulating 4 years live, and a concurrency
+          sensitivity grid — all profitable, mean EV +0.26R/trade, 14/16 positive quarters.
         </p>
       </div>
 
@@ -91,17 +94,17 @@ export default async function EMA21Dashboard() {
 
       <StatsHeader
         stats={{ ...stats, openTrades }}
-        activeApiPath="/api/ema21/active"
-        marketStateApiPath="/api/ema21/market-state"
+        activeApiPath="/api/er-vw/active"
+        marketStateApiPath="/api/er-vw/market-state"
       />
 
-      <LiveStatus activeApiPath="/api/ema21/active" />
+      <LiveStatus activeApiPath="/api/er-vw/active" />
 
-      <EMAMonitor apiPath="/api/ema21/monitor" emaPeriod={21} />
+      <ERVWMonitor apiPath="/api/er-vw/monitor" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <EquityChart data={equity} trades={trades} currentEquity={currentEquity} startingEquity={startingEquity} />
-        <EventsFeed apiPath="/api/ema21/events" />
+        <EventsFeed apiPath="/api/er-vw/events" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -111,10 +114,10 @@ export default async function EMA21Dashboard() {
         <MonthlyReturns data={monthly} />
       </div>
 
-      <TradeHistory trades={trades} apiPath="/api/ema21/trades" />
+      <TradeHistory trades={trades} apiPath="/api/er-vw/trades" />
 
       <footer className="text-center text-xs text-slate-600 py-4 border-t border-surface-border">
-        Bybit demo account · EMA Reclaim + Retest (EMA21) · Not financial advice
+        Bybit demo account · ER (EMA Ribbon) + VW (VWAP Touch), HTF-aligned · Not financial advice
       </footer>
     </main>
   );

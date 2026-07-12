@@ -9,9 +9,7 @@ export default function TabNav() {
   const tabs = [
     { href: "/s1",    label: "S1 Liq Sweep" },
     { href: "/sd",    label: "SD Breakout" },
-    { href: "/ema55", label: "EMA55 Reclaim" },
-    { href: "/ema21", label: "EMA21 Reclaim" },
-    { href: "/ema8",  label: "EMA8 Reclaim" },
+    { href: "/er-vw", label: "ER + VW" },
   ];
 
   return (
