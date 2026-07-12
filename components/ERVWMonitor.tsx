@@ -7,11 +7,79 @@ type SubState =
   | { state: "PENDING"; direction: string; level: number; bars_since_order: number }
   | { state: "OPEN"; direction: string; fill_price: number; sl: number; tp: number };
 
+type HTFFrame = {
+  ema_trend: "bullish" | "bearish" | "neutral";
+  macd_dir: "positive" | "negative";
+  aligned_long: boolean;
+  aligned_short: boolean;
+};
+
+type HTFSummary = {
+  "60"?: HTFFrame;
+  "120"?: HTFFrame;
+  "240"?: HTFFrame;
+  all_aligned_long?: boolean;
+  all_aligned_short?: boolean;
+};
+
 type SymbolEntry = {
   active_system: "ER" | "VW" | null;
+  htf?: HTFSummary;
   ER?: SubState;
   VW?: SubState;
 };
+
+const TF_LABELS: Record<string, string> = { "60": "1h", "120": "2h", "240": "4h" };
+
+function trendColor(trend: string) {
+  return trend === "bullish" ? "text-emerald-400" : trend === "bearish" ? "text-red-400" : "text-slate-500";
+}
+
+function trendArrow(trend: string) {
+  return trend === "bullish" ? "▲" : trend === "bearish" ? "▼" : "–";
+}
+
+function HTFRow({ htf }: { htf: HTFSummary | undefined }) {
+  if (!htf || !htf["60"]) {
+    return <p className="text-[11px] text-slate-600 mt-1">HTF: warming up…</p>;
+  }
+  return (
+    <div className="mt-1 mb-2">
+      <div className="flex items-center gap-2">
+        {(["60", "120", "240"] as const).map((tf) => {
+          const f = htf[tf];
+          if (!f) return null;
+          return (
+            <span
+              key={tf}
+              title={`${TF_LABELS[tf]}: ${f.ema_trend} / MACD ${f.macd_dir}`}
+              className={`text-xs font-mono ${trendColor(f.ema_trend)}`}
+            >
+              {TF_LABELS[tf]}{trendArrow(f.ema_trend)}
+            </span>
+          );
+        })}
+      </div>
+      <div className="flex gap-1.5 mt-1">
+        {htf.all_aligned_long && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-emerald-900/60 text-emerald-300 border-emerald-700">
+            HTF ready ▲
+          </span>
+        )}
+        {htf.all_aligned_short && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-red-900/60 text-red-300 border-red-700">
+            HTF ready ▼
+          </span>
+        )}
+        {!htf.all_aligned_long && !htf.all_aligned_short && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-slate-800 text-slate-500 border-slate-700">
+            not aligned
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 type MonitorData = {
   ts?: string;
@@ -101,6 +169,7 @@ function StateCard({ symbol, data }: { symbol: string; data: SymbolEntry | undef
           </span>
         )}
       </div>
+      <HTFRow htf={data?.htf} />
       {hasER && <SubRow system="ER" data={data?.ER} />}
       {hasVW && <SubRow system="VW" data={data?.VW} />}
     </div>
